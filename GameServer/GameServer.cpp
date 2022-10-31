@@ -12,7 +12,7 @@ int main()
 	if (WSAStartup(wVersionRequested, &wsaData) != 0)
 	{
 		printf("WSAStartup 에러\n");
-		return 1;
+		return -1;
 	}
 
 	SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -20,71 +20,106 @@ int main()
 	{
 		printf("Listen 소켓 에러 %d\n", WSAGetLastError());
 		WSACleanup();
-		return 1;
+		return -1;
+	}
+
+	u_long on = 1;
+	if (ioctlsocket(listenSocket, FIONBIO, &on) == INVALID_SOCKET)
+	{
+		printf("ioctlsocket failed with error : %d\n", WSAGetLastError());
+		WSACleanup();
+		return -1;
 	}
 
 	SOCKADDR_IN service;
 	memset(&service, 0, sizeof(service));
 	service.sin_family = AF_INET;
-	//inet_pton(AF_INET, "127.0.0.1", &service.sin_addr);
 	service.sin_addr.s_addr = htonl(INADDR_ANY);
 	service.sin_port = htons(27015);
 
 	if (bind(listenSocket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
 	{
-		printf("bind 에러 %d\n", WSAGetLastError());
+		printf("bind failed with error : %d\n", WSAGetLastError());
 		closesocket(listenSocket);
 		WSACleanup();
-		return 1;
+		return -1;
 	}
 
 	if (listen(listenSocket, 10) == SOCKET_ERROR)
 	{
-		printf("listen 에러 %d\n", WSAGetLastError());
+		printf("listen failed with error : %d\n", WSAGetLastError());
 		closesocket(listenSocket);
 		WSACleanup();
-		return 1;
+		return -1;
 	}
 
+	printf("Listening....\n");
+
+	//Accept
 	while (true)
 	{
-		printf("Listening.....\n");
-
 		SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
 		if (acceptSocket == INVALID_SOCKET)
 		{
-			printf("Accept 소켓 에러 %d\n", WSAGetLastError());
-			closesocket(listenSocket);
-			WSACleanup();
-			return 1;
+			if (WSAGetLastError() == WSAEWOULDBLOCK)
+			{
+				continue;
+			}
+
+			//진짜에러
+			break;
+		
 		}
 
 		printf("Client Connected\n");
 
+		//Recv
 		while (true)
 		{
-			char sendBuffer[100] = "Hello This is Server!";
-			if (send(acceptSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
-			{
-				printf("send 에러 %d\n", WSAGetLastError());
-				closesocket(acceptSocket);
-				break;
-			}
-
 			char recvBuffer[512];
-			int32 size = recv(acceptSocket, recvBuffer, sizeof(recvBuffer), 0);
-			if (size <= 0)
+			int32 recvLen = recv(acceptSocket, recvBuffer, sizeof(recvBuffer), 0);
+			if (recvLen == SOCKET_ERROR)
 			{
-				printf("recv 에러 %d\n", WSAGetLastError());
-				closesocket(acceptSocket);
+				if (WSAGetLastError() == WSAEWOULDBLOCK)
+				{
+					continue;
+				}
+
+				//진짜 에러
+				break;
+			}
+			else if (recvLen == 0)
+			{
+				//연결 끊김
 				break;
 			}
 
-			printf("Receive data : %s[%dbyte]\n", recvBuffer, size);
-		}
+			printf("Recv Data : %s\n", recvBuffer);
 
-		
+			//Send
+			char sendBuffer[100] = "Hello this is server!";
+			while (true)
+			{
+				if (send(acceptSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
+				{
+					if (WSAGetLastError() == WSAEWOULDBLOCK)
+					{
+						continue;
+					}
+
+					//진짜 에러
+					break;
+				}
+
+				//보낸 데이터 크기 확인
+				printf("Send Buffer Length : %d byte\n", sizeof(sendBuffer));
+				break;
+			}
+		}
+	
 	}
+	
+
 
 	closesocket(listenSocket);
 
