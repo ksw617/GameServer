@@ -55,71 +55,96 @@ int main()
 
 	printf("Listening....\n");
 
-	//Accept
+	//Select 모델
+	//호출이 성공할 시점을 알수 있음.
+	//blocking : 조건이 만족되지 않아서 블록킹되는 상황 예방
+	//NonBlocking : 만족되지 않았을때 불필요 반복 체크 하는거 방지 
+
+	fd_set reads;	//읽기용
+	fd_set writes;	//쓰기용
+
 	while (true)
 	{
-		SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
-		if (acceptSocket == INVALID_SOCKET)
-		{
-			if (WSAGetLastError() == WSAEWOULDBLOCK)
-			{
-				continue;
-			}
+		//FD_ZERO : 초기화를 시켜줌
+		FD_ZERO(&reads);
+		FD_ZERO(&writes);
 
-			//진짜에러
+		//FD_SET : 소켓과 연결
+		FD_SET(listenSocket, &reads);
+
+		//timeval timeout : nullptr(무한대기)
+		//timeval timeout;
+		//timeout.tv_sec; // 초
+		//timeout.tv_usec; // 마이크로 초
+		if (select(0, &reads, &writes, nullptr, nullptr) == SOCKET_ERROR)
+		{
+			//오류 발생시 나가기
 			break;
-		
 		}
-
-		printf("Client Connected\n");
-
-		//Recv
-		while (true)
+		
+		//FD_ISSET : 소켓이 set에 들어가 있으면 0이 아닌 값을 리턴
+		if (FD_ISSET(listenSocket, &reads))
 		{
-			char recvBuffer[512];
-			int32 recvLen = recv(acceptSocket, recvBuffer, sizeof(recvBuffer), 0);
-			if (recvLen == SOCKET_ERROR)
+			SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
+			if (acceptSocket != INVALID_SOCKET)
 			{
-				if (WSAGetLastError() == WSAEWOULDBLOCK)
+				printf("Client Connected");
+				
+				while (true)
 				{
-					continue;
-				}
+					//FD_SET : 소켓과 연결
+					FD_SET(acceptSocket, &reads);
 
-				//진짜 에러
-				break;
-			}
-			else if (recvLen == 0)
-			{
-				//연결 끊김
-				break;
-			}
-
-			printf("Recv Data : %s\n", recvBuffer);
-
-			//Send
-			char sendBuffer[100] = "Hello this is server!";
-			while (true)
-			{
-				if (send(acceptSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
-				{
-					if (WSAGetLastError() == WSAEWOULDBLOCK)
+					//읽을 준비가 되어 있는지
+					if (FD_ISSET(acceptSocket, &reads))
 					{
-						continue;
+						char recvBuffer[512];
+						//받기
+						int32 recvLen = recv(acceptSocket, recvBuffer, sizeof(recvBuffer), 0);
+						//받은 데이터가 문제가 있을경우
+						if (recvLen <= 0)
+						{
+							//다시 처음부터 시작
+							continue;
+						}
+
+						//받은 데이터 확인
+						printf("Recv Data : %s\n", recvBuffer);
+						
+
+						while (true)
+						{
+							//FD_SET : 소켓과 연결
+							FD_SET(acceptSocket, &writes);
+
+							//쓸 준비가 되어 있는지
+							if (FD_ISSET(acceptSocket, &writes))
+							{
+								char sendBuffer[100] = "Hello This is Server!";
+								//보내기
+								int32 sendLen = send(acceptSocket, sendBuffer, sizeof(sendBuffer), 0);
+								//보낸 데이터가 문제가 있을경우
+								if (sendLen == SOCKET_ERROR)
+								{
+									//다시 처음부터 시작
+									continue;
+								}
+
+								//보낸 데이터 크기 확인
+								printf("Send Buffer Length : %d byte\n", sizeof(sendBuffer));
+								break;
+
+							}
+
+						}
 					}
 
-					//진짜 에러
-					break;
 				}
 
-				//보낸 데이터 크기 확인
-				printf("Send Buffer Length : %d byte\n", sizeof(sendBuffer));
-				break;
 			}
 		}
-	
-	}
-	
 
+	}
 
 	closesocket(listenSocket);
 

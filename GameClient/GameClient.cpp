@@ -73,7 +73,7 @@ int main()
 		}
 	}
 
-	printf("Connected To server!");
+	printf("Connected To server!\n");
 
 	//Send
 	char sendBuffer[100] = "Hello This is Client!";
@@ -121,7 +121,6 @@ int main()
 
 		sleep_for(1s);
 	}
-
 
 
 	closesocket(connectSocket);
