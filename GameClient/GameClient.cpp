@@ -74,9 +74,10 @@ int main()
 	}
 
 	printf("Connected To server!\n");
+	
 
 	//Send
-	char sendBuffer[100] = "Hello This is Client!";
+	char sendBuffer[100] = "Hello!";
 	while (true)
 	{
 		if (send(connectSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
@@ -92,8 +93,8 @@ int main()
 
 		printf("Send Buffer Length : %d byte\n", sizeof(sendBuffer));
 
-
 		//Recv
+		
 		while (true)
 		{
 			char recvBuffer[512];
@@ -118,11 +119,11 @@ int main()
 			printf("Recv Data : %s\n", recvBuffer);
 			break;
 		}
-
+		
 		sleep_for(1s);
 	}
 
-
+	
 	closesocket(connectSocket);
 	WSACleanup();
 	return 0;
