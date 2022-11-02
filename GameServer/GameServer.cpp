@@ -75,9 +75,15 @@ int main()
 
 		for (Session& s : sessions)
 		{
-			FD_SET(s.socket, &reads);
-			FD_SET(s.socket, &writes);
-			
+			if (s.recvLen <= s.sendLen)
+			{
+				FD_SET(s.socket, &reads);
+			}
+			else
+			{
+				FD_SET(s.socket, &writes);
+			}
+
 		}
 
 		FD_SET(listenSocket, &reads);
