@@ -76,25 +76,29 @@ int main()
 	printf("Connected To server!\n");
 	
 
-	//Send
-	char sendBuffer[100] = "Hello!";
 	while (true)
 	{
-		if (send(connectSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
+
+		//Send
+		char sendBuffer[100] = "Hello!";
+		while (true)
 		{
-			if (WSAGetLastError() == WSAEWOULDBLOCK)
+			if (send(connectSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
 			{
-				continue;
+				if (WSAGetLastError() == WSAEWOULDBLOCK)
+				{
+					continue;
+				}
+
+				//진짜 에러
+				return -1;
 			}
 
-			//진짜 에러
+			printf("Send Buffer Length : %d byte\n", sizeof(sendBuffer));
 			break;
 		}
 
-		printf("Send Buffer Length : %d byte\n", sizeof(sendBuffer));
-
 		//Recv
-		
 		while (true)
 		{
 			char recvBuffer[512];
@@ -120,6 +124,7 @@ int main()
 			break;
 		}
 		
+
 		sleep_for(1s);
 	}
 

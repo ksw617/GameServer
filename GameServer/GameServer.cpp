@@ -7,10 +7,12 @@
 struct Session
 {
 	SOCKET socket = INVALID_SOCKET;
-	char recvBuffer[512] = { 0 };
-	int recvLen = 0;
-	int sendLen = 0;
+	char recvBuffer[512] = {};
+	int32 recvLen = 0;
+	int32 sendLen = 0;
+
 };
+
 
 int main()
 {
@@ -63,85 +65,24 @@ int main()
 
 	printf("Listening....\n");
 
-	vector<Session> sessions;
+	//생성 : WSACreateEvent
+	//소멸 : WSACloseEvent
+	//준비 되면 : WSAWaitForMultipleEvents
+	//어떤 애인지 알려면 : WSAEnumNetworkEvents
 
-	fd_set reads;
-	fd_set writes;
+	//클라
+	//FD_CONNECT : 연결 절차 완료
+	//FD_READ : 데이터 수신 가능 recv
+	//FD_WRITE : 데이터 송신 가능 send
+	//FD_CLOSE : 상대가 접속 종료
 
-	while (true)
-	{
-		FD_ZERO(&reads);
-		FD_ZERO(&writes);
-
-		for (Session& s : sessions)
-		{
-			if (s.recvLen <= s.sendLen)
-			{
-				FD_SET(s.socket, &reads);
-			}
-			else
-			{
-				FD_SET(s.socket, &writes);
-			}
-
-		}
-
-		FD_SET(listenSocket, &reads);
-
-		int value = select(0, &reads, &writes, nullptr, nullptr);
-
-		if (value == SOCKET_ERROR)
-		{
-			//에러 발생
-			break;
-		}
-
-		if (FD_ISSET(listenSocket, &reads))
-		{
-			SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
-			sessions.push_back(Session{acceptSocket});
-			printf("Client Connected..\n");
-
-		}
-
-		for (Session& s : sessions)
-		{
-			if (FD_ISSET(s.socket, &reads))
-			{
-				int recvLen = recv(s.socket, s.recvBuffer, sizeof(s.recvBuffer), 0);
-				if (recvLen <= 0)
-				{
-					//sockets에서 제거
-					continue;
-				}
-
-				printf("Recv Data : %s\n", s.recvBuffer);
-				s.recvLen = recvLen;
-			}
-
-			if (FD_ISSET(s.socket, &writes))
-			{
-				int sendLen = send(s.socket, &s.recvBuffer[s.sendLen], s.recvLen - s.sendLen, 0);
-				if (sendLen == SOCKET_ERROR)
-				{
-					//sockets에서 제거
-					continue;
-				}
-
-				s.sendLen += sendLen;
-				if (s.recvLen == s.sendLen)
-				{
-					s.recvLen = 0;
-					s.sendLen = 0;
-				}
-			}
-			
-		}
-
-	}
+	//서버
+	//FD_ACCEPT : 접속한 클라가 있음 accept
+	//FD_READ : 데이터 수신 가능 recv
+	//FD_WRITE : 데이터 송신 가능 send
+	//FD_CLOSE : 상대가 접속 종료
 
 	
-
 	closesocket(listenSocket);
 
 	WSACleanup();
