@@ -98,31 +98,31 @@ int main()
 			break;
 		}
 
-		//Recv
-		while (true)
-		{
-			char recvBuffer[512];
-			int32 recvLen = recv(connectSocket, recvBuffer, sizeof(recvBuffer), 0);
-			if (recvLen == SOCKET_ERROR)
-			{
-				if (WSAGetLastError() == WSAEWOULDBLOCK)
-				{
-					continue;
-				}
-
-				//진짜 에러
-				break;
-			}
-			else if (recvLen == 0)
-			{
-				//연결 끊김
-				break;
-			}
-
-			//받은 데이터 확인
-			printf("Recv Data : %s\n", recvBuffer);
-			break;
-		}
+		////Recv
+		//while (true)
+		//{
+		//	char recvBuffer[512];
+		//	int32 recvLen = recv(connectSocket, recvBuffer, sizeof(recvBuffer), 0);
+		//	if (recvLen == SOCKET_ERROR)
+		//	{
+		//		if (WSAGetLastError() == WSAEWOULDBLOCK)
+		//		{
+		//			continue;
+		//		}
+		//
+		//		//진짜 에러
+		//		break;
+		//	}
+		//	else if (recvLen == 0)
+		//	{
+		//		//연결 끊김
+		//		break;
+		//	}
+		//
+		//	//받은 데이터 확인
+		//	printf("Recv Data : %s\n", recvBuffer);
+		//	break;
+		//}
 		
 
 		sleep_for(1s);

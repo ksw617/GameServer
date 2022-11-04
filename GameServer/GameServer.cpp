@@ -13,7 +13,6 @@ struct Session
 
 };
 
-
 int main()
 {
 	WORD wVersionRequested = MAKEWORD(2, 2);
@@ -65,23 +64,106 @@ int main()
 
 	printf("Listening....\n");
 
-	//생성 : WSACreateEvent
-	//소멸 : WSACloseEvent
-	//준비 되면 : WSAWaitForMultipleEvents
-	//어떤 애인지 알려면 : WSAEnumNetworkEvents
+	vector<WSAEVENT> wsaEvents;
+	vector<SOCKET> sockets;
 
-	//클라
-	//FD_CONNECT : 연결 절차 완료
-	//FD_READ : 데이터 수신 가능 recv
-	//FD_WRITE : 데이터 송신 가능 send
-	//FD_CLOSE : 상대가 접속 종료
 
-	//서버
-	//FD_ACCEPT : 접속한 클라가 있음 accept
-	//FD_READ : 데이터 수신 가능 recv
-	//FD_WRITE : 데이터 송신 가능 send
-	//FD_CLOSE : 상대가 접속 종료
+	WSAEVENT listenEvent = WSACreateEvent();
+	wsaEvents.push_back(listenEvent);
+	sockets.push_back(listenSocket);
 
+	int32 eventSelect = WSAEventSelect(listenSocket, listenEvent, FD_ACCEPT | FD_CLOSE);
+	if (eventSelect == SOCKET_ERROR)
+	{
+		return -1;
+	}
+
+	while (true)
+	{
+		int eventIndex = WSAWaitForMultipleEvents(wsaEvents.size(), &wsaEvents[0], FALSE, WSA_INFINITE, FALSE);
+		if (eventIndex == WSA_WAIT_FAILED)
+		{
+			continue;
+		}
+
+		eventIndex -= WSA_WAIT_EVENT_0;
+
+		WSANETWORKEVENTS networkEvents;
+		if (WSAEnumNetworkEvents(sockets[eventIndex], wsaEvents[eventIndex], &networkEvents) == SOCKET_ERROR)
+		{
+			continue;
+		}
+
+		if (networkEvents.lNetworkEvents & FD_ACCEPT)
+		{
+			if (networkEvents.iErrorCode[FD_ACCEPT_BIT] != 0)
+			{
+				continue;
+			}
+
+			//accept
+			SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
+			if (acceptSocket != INVALID_SOCKET)
+			{
+				printf("Client Connected\n");
+
+				WSAEVENT acceptEvent = WSACreateEvent();
+				wsaEvents.push_back(acceptEvent);
+				sockets.push_back(acceptSocket);
+				if (WSAEventSelect(acceptSocket, acceptEvent, FD_READ | FD_WRITE | FD_CLOSE) == SOCKET_ERROR)
+				{
+					return -1;
+				}
+			}
+		}
+
+		
+		if (networkEvents.lNetworkEvents & FD_READ)
+		{
+			if (networkEvents.iErrorCode[FD_READ_BIT] != 0)
+			{
+				continue;
+			}
+
+			SOCKET& sock = sockets[eventIndex];
+			
+			char recvBuffer[512];
+			int recvLen = recv(sock, recvBuffer, sizeof(recvBuffer), 0);
+			if (recvLen == SOCKET_ERROR)
+			{
+				if (WSAGetLastError() != WSAEWOULDBLOCK)
+				{
+					continue;
+				}
+			}
+
+			printf("Recv Data: %s\n", recvBuffer);
+		}
+
+		//보내는거
+		if (networkEvents.lNetworkEvents & FD_WRITE)
+		{
+			//에러 체크
+			if (networkEvents.iErrorCode[FD_WRITE_BIT] != 0)
+			{
+				continue;
+			}
+			SOCKET& sock = sockets[eventIndex];
+
+			char sendBuffer[100] = "Hello!";
+			int sendLen = send(sock, sendBuffer, sizeof(sendBuffer), 0);
+			if (sendLen == SOCKET_ERROR)
+			{
+				if (WSAGetLastError() != WSAEWOULDBLOCK)
+				{
+					continue;
+				}
+			}
+
+			//보낸 데이터 확인
+			printf("Send Buffer Length : %d byte\n", sizeof(sendBuffer));
+		}
+	}
 	
 	closesocket(listenSocket);
 
