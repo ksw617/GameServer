@@ -123,9 +123,6 @@ int main()
 		}
 
 		closesocket(acceptSocket);
-		WSACloseEvent(wsaEvent);
-
-
 	}
 
 	closesocket(listenSocket);
