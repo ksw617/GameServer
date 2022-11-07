@@ -47,19 +47,16 @@ int main()
 	{
 		if (connect(connectSocket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
 		{
-			//즉시 완료할 수 없는 비블로킹 소켓의 작업에서 반환
 			if (WSAGetLastError() == WSAEWOULDBLOCK)
 			{
 				continue;
 			}
 
-			//작업이 이미 진행 중
 			if (WSAGetLastError() == WSAEALREADY)
 			{
 				continue;
 			}
 
-			//소켓이 이미 연결되어 있음
 			if (WSAGetLastError() == WSAEISCONN)
 			{
 				break;
@@ -75,59 +72,45 @@ int main()
 
 	printf("Connected To server!\n");
 	
+	char sendBuffer[100] = "Hello This is Client!";
+	WSAOVERLAPPED overlaped = {};
+	WSAEVENT wsaEvent = WSACreateEvent();
+	overlaped.hEvent = wsaEvent;
+	
 
 	while (true)
 	{
+		WSABUF wsaBuf;
+		wsaBuf.buf = sendBuffer;
+		wsaBuf.len = sizeof(sendBuffer);
 
-		//Send
-		char sendBuffer[100] = "Hello!";
-		while (true)
+		DWORD sendLen = 0;
+		DWORD flags = 0;
+
+		if (WSASend(connectSocket, &wsaBuf, 1, &sendLen, flags, &overlaped, nullptr) == SOCKET_ERROR)
 		{
-			if (send(connectSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
+			if (WSAGetLastError() == WSA_IO_PENDING)
 			{
-				if (WSAGetLastError() == WSAEWOULDBLOCK)
+				//기다림
+				WSAWaitForMultipleEvents(1, &wsaEvent, TRUE, WSA_INFINITE, FALSE);
+				if (WSAGetOverlappedResult(connectSocket, &overlaped, &sendLen, FALSE, &flags))
 				{
-					continue;
+					printf("Overlapped Result : ");
 				}
-
-				//진짜 에러
-				return -1;
 			}
-
-			printf("Send Buffer Length : %d byte\n", sizeof(sendBuffer));
-			break;
+			else
+			{
+				//문제 있는 상황
+				break;
+			}
 		}
 
-		////Recv
-		//while (true)
-		//{
-		//	char recvBuffer[512];
-		//	int32 recvLen = recv(connectSocket, recvBuffer, sizeof(recvBuffer), 0);
-		//	if (recvLen == SOCKET_ERROR)
-		//	{
-		//		if (WSAGetLastError() == WSAEWOULDBLOCK)
-		//		{
-		//			continue;
-		//		}
-		//
-		//		//진짜 에러
-		//		break;
-		//	}
-		//	else if (recvLen == 0)
-		//	{
-		//		//연결 끊김
-		//		break;
-		//	}
-		//
-		//	//받은 데이터 확인
-		//	printf("Recv Data : %s\n", recvBuffer);
-		//	break;
-		//}
-		
+		printf("Send Buffer Length : %d byte\n", sizeof(sendBuffer));
 
 		sleep_for(1s);
 	}
 
+	WSACloseEvent(wsaEvent);
 	
 	closesocket(connectSocket);
 	WSACleanup();

@@ -4,14 +4,15 @@
 #include <WS2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 
-struct Session
-{
-	SOCKET socket = INVALID_SOCKET;
-	char recvBuffer[512] = {};
-	int32 recvLen = 0;
-	int32 sendLen = 0;
+//IN DWORD dwError,
+//IN DWORD cbTransferred,
+//IN LPWSAOVERLAPPED lpOverlapped,
+//IN DWORD dwFlags
 
-};
+void CALLBACK RecvCallback(DWORD error, DWORD recvLen, LPWSAOVERLAPPED overlapped, DWORD flags)
+{
+	printf("Call back Recv Length : %d\n", recvLen);
+}
 
 int main()
 {
@@ -64,107 +65,69 @@ int main()
 
 	printf("Listening....\n");
 
-	vector<WSAEVENT> wsaEvents;
-	vector<SOCKET> sockets;
-
-
-	WSAEVENT listenEvent = WSACreateEvent();
-	wsaEvents.push_back(listenEvent);
-	sockets.push_back(listenSocket);
-
-	int32 eventSelect = WSAEventSelect(listenSocket, listenEvent, FD_ACCEPT | FD_CLOSE);
-	if (eventSelect == SOCKET_ERROR)
-	{
-		return -1;
-	}
+	//Todo
 
 	while (true)
 	{
-		int eventIndex = WSAWaitForMultipleEvents(wsaEvents.size(), &wsaEvents[0], FALSE, WSA_INFINITE, FALSE);
-		if (eventIndex == WSA_WAIT_FAILED)
+		SOCKET acceptSocket = INVALID_SOCKET;
+		
+		while (true)
 		{
-			continue;
-		}
-
-		eventIndex -= WSA_WAIT_EVENT_0;
-
-		WSANETWORKEVENTS networkEvents;
-		if (WSAEnumNetworkEvents(sockets[eventIndex], wsaEvents[eventIndex], &networkEvents) == SOCKET_ERROR)
-		{
-			continue;
-		}
-
-		if (networkEvents.lNetworkEvents & FD_ACCEPT)
-		{
-			if (networkEvents.iErrorCode[FD_ACCEPT_BIT] != 0)
+			
+			acceptSocket = accept(listenSocket, NULL, NULL);
+			if (acceptSocket == INVALID_SOCKET)
 			{
-				continue;
-			}
+				if (WSAGetLastError() == WSAEWOULDBLOCK)
+				{
+					continue;
+				}
 
-			//accept
-			SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
-			if (acceptSocket != INVALID_SOCKET)
+				//진짜 에러
+				return -1;
+
+			}
+			else
 			{
 				printf("Client Connected\n");
-
-				WSAEVENT acceptEvent = WSACreateEvent();
-				wsaEvents.push_back(acceptEvent);
-				sockets.push_back(acceptSocket);
-				if (WSAEventSelect(acceptSocket, acceptEvent, FD_READ | FD_WRITE | FD_CLOSE) == SOCKET_ERROR)
-				{
-					return -1;
-				}
+				break;
 			}
 		}
 
-		
-		if (networkEvents.lNetworkEvents & FD_READ)
-		{
-			if (networkEvents.iErrorCode[FD_READ_BIT] != 0)
-			{
-				continue;
-			}
+		WSAOVERLAPPED overlapped = {};
 
-			SOCKET& sock = sockets[eventIndex];
-			
+		while (true)
+		{
 			char recvBuffer[512];
-			int recvLen = recv(sock, recvBuffer, sizeof(recvBuffer), 0);
-			if (recvLen == SOCKET_ERROR)
+			WSABUF wsaBuf;
+			wsaBuf.buf = recvBuffer;
+			wsaBuf.len = sizeof(recvBuffer);
+			
+			DWORD recvLen = 0;
+			DWORD flags = 0;
+
+			if (WSARecv(acceptSocket, &wsaBuf, 1, &recvLen, &flags, &overlapped, RecvCallback) == SOCKET_ERROR)
 			{
-				if (WSAGetLastError() != WSAEWOULDBLOCK)
+				if (WSAGetLastError() == WSA_IO_PENDING)
 				{
-					continue;
+					//기다림
+					SleepEx(INFINITE, TRUE);
+				}
+				else
+				{
+					break;
 				}
 			}
 
-			printf("Recv Data: %s\n", recvBuffer);
+			printf("Recv Data : %s\n", recvBuffer);
+
 		}
 
-		//보내는거
-		if (networkEvents.lNetworkEvents & FD_WRITE)
-		{
-			//에러 체크
-			if (networkEvents.iErrorCode[FD_WRITE_BIT] != 0)
-			{
-				continue;
-			}
-			SOCKET& sock = sockets[eventIndex];
+		closesocket(acceptSocket);
+		WSACloseEvent(wsaEvent);
 
-			char sendBuffer[100] = "Hello!";
-			int sendLen = send(sock, sendBuffer, sizeof(sendBuffer), 0);
-			if (sendLen == SOCKET_ERROR)
-			{
-				if (WSAGetLastError() != WSAEWOULDBLOCK)
-				{
-					continue;
-				}
-			}
 
-			//보낸 데이터 확인
-			printf("Send Buffer Length : %d byte\n", sizeof(sendBuffer));
-		}
 	}
-	
+
 	closesocket(listenSocket);
 
 	WSACleanup();
