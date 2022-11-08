@@ -1,17 +1,60 @@
 #include "pch.h"
 
+#include <thread>
+
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 
-//IN DWORD dwError,
-//IN DWORD cbTransferred,
-//IN LPWSAOVERLAPPED lpOverlapped,
-//IN DWORD dwFlags
-
-void CALLBACK RecvCallback(DWORD error, DWORD recvLen, LPWSAOVERLAPPED overlapped, DWORD flags)
+struct Session
 {
-	printf("Call back Recv Length : %d\n", recvLen);
+	SOCKET socket = INVALID_SOCKET;
+	char recvBuffer[512] = {};
+	int32 recLen = 0;
+};
+
+enum IO_TYPE
+{
+	IO_NONE,
+	IO_RECV,
+	IO_SEND,
+};
+
+struct OverlappedEx
+{
+	WSAOVERLAPPED overlapped = {};
+	IO_TYPE type;
+};
+
+void RecvThread(HANDLE iocpHandle)
+{
+	
+
+	while (true)
+	{
+		DWORD bytesTransferred = 0;
+		Session* session = nullptr;
+		OverlappedEx* overlappedEx = nullptr;
+
+
+		BOOL returnValue = GetQueuedCompletionStatus(iocpHandle, &bytesTransferred, (ULONG_PTR*)&session, (LPOVERLAPPED*)&overlappedEx, INFINITE);
+		if (returnValue == FALSE || bytesTransferred == 0)
+		{
+			continue;
+		}
+
+		overlappedEx->type = IO_TYPE::IO_RECV;
+		printf("recv Length  %d\n", bytesTransferred);
+
+		WSABUF wsaBuf;
+		wsaBuf.buf = session->recvBuffer;
+		wsaBuf.len = sizeof(session->recvBuffer);
+
+		DWORD recvLen = 0;
+		DWORD flags = 0;
+
+		WSARecv(session->socket, &wsaBuf, 1, &recvLen, &flags, &overlappedEx->overlapped, nullptr);
+	}
 }
 
 int main()
@@ -29,14 +72,6 @@ int main()
 	if (listenSocket == INVALID_SOCKET)
 	{
 		printf("Listen 소켓 에러 %d\n", WSAGetLastError());
-		WSACleanup();
-		return -1;
-	}
-
-	u_long on = 1;
-	if (ioctlsocket(listenSocket, FIONBIO, &on) == INVALID_SOCKET)
-	{
-		printf("ioctlsocket failed with error : %d\n", WSAGetLastError());
 		WSACleanup();
 		return -1;
 	}
@@ -65,67 +100,44 @@ int main()
 
 	printf("Listening....\n");
 
-	//Todo
+	vector<Session*> sessionManager;
+	HANDLE iocpHandle =  CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, NULL);
+	
+	thread t(RecvThread, iocpHandle);
 
+	//TODO
 	while (true)
 	{
-		SOCKET acceptSocket = INVALID_SOCKET;
+		SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
+		if (acceptSocket ==INVALID_SOCKET)
+		{
+			//오류
+			continue;
+		}
+		printf("Client Connected!\n");
+
+		Session* session = new Session();
+		session->socket = acceptSocket;
+		sessionManager.push_back(session);
+
+		CreateIoCompletionPort((HANDLE)acceptSocket, iocpHandle, (ULONG_PTR)session, NULL);
 		
-		while (true)
-		{
-			
-			acceptSocket = accept(listenSocket, NULL, NULL);
-			if (acceptSocket == INVALID_SOCKET)
-			{
-				if (WSAGetLastError() == WSAEWOULDBLOCK)
-				{
-					continue;
-				}
+		OverlappedEx* overlappedEx = new OverlappedEx();
+		overlappedEx->type = IO_TYPE::IO_RECV;
 
-				//진짜 에러
-				return -1;
+		WSABUF wsaBuf;
+		wsaBuf.buf = session->recvBuffer;
+		wsaBuf.len = sizeof(session->recvBuffer);
 
-			}
-			else
-			{
-				printf("Client Connected\n");
-				break;
-			}
-		}
+		DWORD recvLen = 0;
+		DWORD flags = 0;
 
-		WSAOVERLAPPED overlapped = {};
+		WSARecv(acceptSocket, &wsaBuf, 1, &recvLen, &flags, &overlappedEx->overlapped, nullptr);
 
-		while (true)
-		{
-			char recvBuffer[512];
-			WSABUF wsaBuf;
-			wsaBuf.buf = recvBuffer;
-			wsaBuf.len = sizeof(recvBuffer);
-			
-			DWORD recvLen = 0;
-			DWORD flags = 0;
-
-			if (WSARecv(acceptSocket, &wsaBuf, 1, &recvLen, &flags, &overlapped, RecvCallback) == SOCKET_ERROR)
-			{
-				if (WSAGetLastError() == WSA_IO_PENDING)
-				{
-					//기다림
-					SleepEx(INFINITE, TRUE);
-				}
-				else
-				{
-					break;
-				}
-			}
-
-			printf("Recv Data : %s\n", recvBuffer);
-
-		}
-
-		closesocket(acceptSocket);
+		printf("recv Length  %d\n", recvLen);
 	}
 
-	closesocket(listenSocket);
+	t.join();
 
 	WSACleanup();
 	return 0;
