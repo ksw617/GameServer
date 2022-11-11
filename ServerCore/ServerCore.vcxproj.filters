@@ -19,6 +19,7 @@
     <ClInclude Include="Types.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="SocketHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -27,5 +28,6 @@
     <ClCompile Include="CorePch.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="SocketHelper.cpp" />
   </ItemGroup>
 </Project>

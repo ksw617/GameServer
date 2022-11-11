@@ -27,6 +27,9 @@ int main()
 		return -1;
 	}
 
+
+
+
 	u_long on = 1;
 	if (ioctlsocket(connectSocket, FIONBIO, &on) == INVALID_SOCKET)
 	{
