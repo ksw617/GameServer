@@ -62,11 +62,13 @@ int main()
 	WORD wVersionRequested = MAKEWORD(2, 2);
 	WSAData wsaData;
 
-	if (WSAStartup(wVersionRequested, &wsaData) != 0)
+	if (WSAStartup(wVersionRequested, &wsaData) != 0) 
 	{
 		printf("WSAStartup ¿¡·¯\n");
 		return -1;
 	}
+
+
 
 	SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (listenSocket == INVALID_SOCKET)

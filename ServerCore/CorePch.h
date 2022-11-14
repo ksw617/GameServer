@@ -1,7 +1,7 @@
 #pragma once
-
 #include "Types.h"
-#include "CoreTLS.h"
+#include "Macro.h"
+
 #include <vector>
 #include <list>
 #include <queue>

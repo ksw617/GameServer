@@ -20,6 +20,9 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="SocketHelper.h" />
+    <ClInclude Include="Macro.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
