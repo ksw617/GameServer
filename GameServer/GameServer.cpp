@@ -57,8 +57,10 @@ void RecvThread(HANDLE iocpHandle)
 	}
 }
 
+
 int main()
 {
+
 	WORD wVersionRequested = MAKEWORD(2, 2);
 	WSAData wsaData;
 

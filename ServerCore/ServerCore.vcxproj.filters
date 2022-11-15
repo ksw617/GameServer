@@ -19,8 +19,10 @@
     <ClInclude Include="Types.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="SocketHelper.h" />
     <ClInclude Include="Macro.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketHelper.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
@@ -31,6 +33,8 @@
     <ClCompile Include="CorePch.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="SocketHelper.cpp" />
+    <ClCompile Include="SocketHelper.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

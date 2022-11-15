@@ -1,13 +1,16 @@
 #include "pch.h"
 #include "SocketHelper.h"
 
+LPFN_ACCEPTEX SocketHelper::lpfnAcceptEx = NULL;
+
 void SocketHelper::Init()
 {
 	WORD wVersionRequested = MAKEWORD(2, 2);
 	WSAData wsaData;
-
-	//CONDITION_CRASH(false);
 	CONDITION_CRASH(WSAStartup(wVersionRequested,OUT &wsaData) == 0);
+
+	SOCKET sock = CreateSocket();
+	CONDITION_CRASH(SocketMode(sock, WSAID_ACCEPTEX, reinterpret_cast<LPVOID*>(&lpfnAcceptEx)));
 }
 
 void SocketHelper::Clear()
@@ -23,15 +26,68 @@ SOCKET SocketHelper::CreateSocket()
 bool SocketHelper::SocketMode(SOCKET socket, GUID guid, LPVOID* lpfn)
 {
 	DWORD bytes = 0;
-	//[in]  소켓
-	//[in]  수행할 제어 작업 코드
-	//[in]  입력 버퍼 연결 포인터
-	//[in]  입력 버퍼의 크기(byte)
-	//[out] 출력 버퍼 연결 포인터
-	//[in]  출력 버퍼의 크기(byte)
-	//[out] 출력의 식제 바이트 수에 대한 포인터
-	//[in]  WSAOVERLAPPED 구조체에 대한 포인터(겹치지 않는 소켓의 경우 무시)
-	//[in]  작업이 완료될때 호출되는 완료 루틴에 대한 포인터
 	bool result = WSAIoctl(socket, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid, sizeof(guid), lpfn, sizeof(*lpfn), &bytes, NULL, NULL);
 	return result != SOCKET_ERROR;
+}
+
+bool SocketHelper::Bind(SOCKET socket, wstring ip, uint16 port)
+{
+	SOCKADDR_IN service;
+	memset(&service, 0, sizeof(service));
+	service.sin_family = AF_INET;
+	IN_ADDR address;
+	InetPtonW(AF_INET, ip.c_str(), &address);
+	service.sin_addr = address;
+	service.sin_port = htons(port);
+
+	return bind(socket, reinterpret_cast<SOCKADDR*>(&service), sizeof(service)) != SOCKET_ERROR;
+}
+
+bool SocketHelper::BindAny(SOCKET socket, uint16 port)
+{
+	SOCKADDR_IN service;
+	memset(&service, 0, sizeof(service));
+	service.sin_family = AF_INET;
+	service.sin_addr.s_addr = htonl(INADDR_ANY);
+	service.sin_port = htons(port);
+
+	return bind(socket, reinterpret_cast<SOCKADDR*>(&service), sizeof(service)) != SOCKET_ERROR;
+}
+
+bool SocketHelper::Listen(SOCKET socket, int32 backlog)
+{
+	return listen(socket, backlog) != SOCKET_ERROR;
+}
+
+void SocketHelper::Close(SOCKET& socket)
+{
+	if (socket != INVALID_SOCKET)
+	{
+		closesocket(socket);
+		socket = INVALID_SOCKET;
+	}
+}
+
+bool SocketHelper::SetKeepAlive(SOCKET socket, bool enable)
+{
+	return setsockopt(socket, SOL_SOCKET, SO_KEEPALIVE, (char*)&enable, sizeof(enable)) != SOCKET_ERROR;
+}
+
+bool SocketHelper::SetLinger(SOCKET socket, uint16 onoff, uint16 time)
+{
+	LINGER linger;
+	linger.l_onoff = onoff;
+	linger.l_linger = time;
+
+	return setsockopt(socket, SOL_SOCKET, SO_LINGER, (char*)&linger, sizeof(linger)) != SOCKET_ERROR;
+}
+
+bool SocketHelper::SetReuseAddress(SOCKET socket, bool enable)
+{
+	return setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, (char*)&enable, sizeof(enable)) != SOCKET_ERROR;
+}
+
+bool SocketHelper::SetTcpNoDelay(SOCKET socket, bool enable)
+{
+	return setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (char*)&enable, sizeof(enable)) != SOCKET_ERROR;
 }
