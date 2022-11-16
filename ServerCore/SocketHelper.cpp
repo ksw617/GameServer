@@ -30,17 +30,9 @@ bool SocketHelper::SocketMode(SOCKET socket, GUID guid, LPVOID* lpfn)
 	return result != SOCKET_ERROR;
 }
 
-bool SocketHelper::Bind(SOCKET socket, wstring ip, uint16 port)
+bool SocketHelper::Bind(SOCKET socket, NetworkAddress address)
 {
-	SOCKADDR_IN service;
-	memset(&service, 0, sizeof(service));
-	service.sin_family = AF_INET;
-	IN_ADDR address;
-	InetPtonW(AF_INET, ip.c_str(), &address);
-	service.sin_addr = address;
-	service.sin_port = htons(port);
-
-	return bind(socket, reinterpret_cast<SOCKADDR*>(&service), sizeof(service)) != SOCKET_ERROR;
+	return bind(socket, reinterpret_cast<SOCKADDR*>(&address.GetSockAddr()), sizeof(SOCKADDR_IN)) != SOCKET_ERROR;
 }
 
 bool SocketHelper::BindAny(SOCKET socket, uint16 port)
