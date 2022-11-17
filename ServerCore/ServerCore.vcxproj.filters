@@ -25,10 +25,16 @@
     <ClInclude Include="SocketHelper.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="IocpCore.h">
+    <ClInclude Include="NetworkAddress.h">
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="IocpEvent.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="IocpCore.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
@@ -42,10 +48,16 @@
     <ClCompile Include="SocketHelper.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="IocpCore.cpp">
+    <ClCompile Include="NetworkAddress.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="IocpEvent.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="IocpCore.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Session.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>

@@ -9,15 +9,15 @@ enum class IO_TYPE : uint8
 
 };
 
-class IocpEvent	  : public OVERLAPPED
+
+class IocpEvent : public OVERLAPPED
 {
-private:
+protected:
 	IO_TYPE type;
 public:
 	IocpEvent(IO_TYPE _type);
 public:
 	void Init();
 	IO_TYPE GetType();
-
 };
 

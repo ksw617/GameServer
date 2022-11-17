@@ -8,10 +8,11 @@
 }								\
 
 
-#define CONDITION_CRASH(condition)	\
-{									\
-	if (!condition)					\
-	{								\
-		CRASH("CRASH");				\
-	}								\
-}									\
+#define CONDITION_CRASH(condition)		\
+{										\
+	if (!condition)						\
+	{									\
+		CRASH("CRASH");					\
+		__analysis_assume(condition);	\
+	}									\
+}										\

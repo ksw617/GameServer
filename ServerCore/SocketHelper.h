@@ -24,4 +24,3 @@ public:
 	static bool SetReuseAddress(SOCKET socket, bool enable);
 	static bool SetTcpNoDelay(SOCKET socket, bool enable);
 };
-

@@ -7,7 +7,7 @@ void SocketHelper::Init()
 {
 	WORD wVersionRequested = MAKEWORD(2, 2);
 	WSAData wsaData;
-	CONDITION_CRASH(WSAStartup(wVersionRequested,OUT &wsaData) == 0);
+	CONDITION_CRASH(WSAStartup(wVersionRequested, OUT & wsaData) == 0);
 
 	SOCKET sock = CreateSocket();
 	CONDITION_CRASH(SocketMode(sock, WSAID_ACCEPTEX, reinterpret_cast<LPVOID*>(&lpfnAcceptEx)));
@@ -32,7 +32,8 @@ bool SocketHelper::SocketMode(SOCKET socket, GUID guid, LPVOID* lpfn)
 
 bool SocketHelper::Bind(SOCKET socket, NetworkAddress address)
 {
-	return bind(socket, reinterpret_cast<SOCKADDR*>(&address.GetSockAddr()), sizeof(SOCKADDR_IN)) != SOCKET_ERROR;
+
+	return bind(socket, reinterpret_cast<SOCKADDR*>(&address.GetSockAddrIn()), sizeof(SOCKADDR_IN)) != SOCKET_ERROR;
 }
 
 bool SocketHelper::BindAny(SOCKET socket, uint16 port)

@@ -3,34 +3,37 @@
 
 NetworkAddress::NetworkAddress(SOCKADDR_IN sockAddrIn)
 {
-    service = sockAddrIn;
+	service	= sockAddrIn;
 
 }
 
 NetworkAddress::NetworkAddress(wstring ip, uint16 port)
 {
-    memset(&service, 0, sizeof(service));
-    service.sin_family = AF_INET;
-    IN_ADDR address;
-    InetPtonW(AF_INET, ip.c_str(), &address);
-    service.sin_addr = address;
-    service.sin_port = htons(port);
-
+	//메모리 밀어버림
+	memset(&service, 0, sizeof(service));
+	//ipv4 or ipv6
+	service.sin_family = AF_INET;
+	//ip정함
+	IN_ADDR address;
+	InetPtonW(AF_INET, ip.c_str(), &address);
+	service.sin_addr = address;
+	//포트정함
+	service.sin_port = htons(port);
 }
 
-SOCKADDR_IN& NetworkAddress::GetSockAddr()
+SOCKADDR_IN& NetworkAddress::GetSockAddrIn()
 {
-    return service;
+	return service;
 }
 
 wstring NetworkAddress::GetIp()
 {
-    WCHAR buffer[100];                            // 200         / 2
-    InetNtopW(AF_INET, &service.sin_addr,OUT buffer, sizeof(buffer)/ sizeof(buffer[0]));
-    return wstring(buffer);
+	WCHAR buffer[100];
+	InetNtopW(AF_INET, &service.sin_addr, buffer, sizeof(buffer) / sizeof(WCHAR));
+	return wstring(buffer);
 }
 
 uint16 NetworkAddress::GetPort()
 {
-    return ntohs(service.sin_port);
+	return ntohs(service.sin_port);
 }

@@ -5,7 +5,6 @@ class IocpObj
 public:
 	virtual HANDLE GetHandle() abstract;
 	virtual void Observe(class IocpEvent* iocpEvent, int32 bytes = 0) abstract;
-
 };
 class IocpCore
 {
