@@ -2,6 +2,9 @@
 #include "IocpCore.h"
 #include "IocpEvent.h"
 
+//юс╫ц
+IocpCore GIocpCore;
+
 IocpCore::IocpCore()
 {
     iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, NULL);

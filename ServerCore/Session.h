@@ -9,17 +9,17 @@ public:
 private:
 	SOCKET socket = INVALID_SOCKET;
 	NetworkAddress networkAddress = {};
-	atomic<bool> connected = false;								  
-public:
-	Session();
-	~Session();
+	atomic<bool> connected = false;
 public:
 	virtual HANDLE GetHandle() override;
 	virtual void Observe(class IocpEvent* iocpEvent, int32 bytes = 0) override;
 public:
-	void SetNetWorkAddress(NetworkAddress address);
-	NetworkAddress GetNetworkAddress();
+	void SetNetAddress(NetworkAddress address);
 	SOCKET GetSocket();
+	NetworkAddress GetNetworkAddress();
 
+public:
+	Session();
+	~Session();
 };
 

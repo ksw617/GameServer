@@ -23,4 +23,5 @@ public:
 	static bool SetLinger(SOCKET socket, uint16 onoff, uint16 time);
 	static bool SetReuseAddress(SOCKET socket, bool enable);
 	static bool SetTcpNoDelay(SOCKET socket, bool enable);
+	static bool SetUpdateAcceptSocket(SOCKET socket, SOCKET listenSocket);
 };

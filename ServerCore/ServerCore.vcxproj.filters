@@ -37,6 +37,9 @@
     <ClInclude Include="Session.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Listener.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -58,6 +61,9 @@
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="Session.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Listener.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>

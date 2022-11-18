@@ -2,6 +2,31 @@
 #include "Session.h"
 #include "SocketHelper.h"
 
+HANDLE Session::GetHandle()
+{
+    return reinterpret_cast<HANDLE>(socket);
+}
+
+void Session::Observe(IocpEvent* iocpEvent, int32 bytes)
+{
+    //Todo
+}
+
+void Session::SetNetAddress(NetworkAddress address)
+{
+    networkAddress = address;
+}
+
+SOCKET Session::GetSocket()
+{
+    return socket;
+}
+
+NetworkAddress Session::GetNetworkAddress()
+{
+    return networkAddress;
+}
+
 Session::Session()
 {
     socket = SocketHelper::CreateSocket();
@@ -10,29 +35,4 @@ Session::Session()
 Session::~Session()
 {
     SocketHelper::Close(socket);
-}
-
-HANDLE Session::GetHandle()
-{
-    return reinterpret_cast<HANDLE>(socket);
-}
-
-void Session::Observe(IocpEvent* iocpEvent, int32 bytes)
-{
-    //TODO
-}
-
-void Session::SetNetWorkAddress(NetworkAddress address)
-{
-    networkAddress = address;
-}
-
-NetworkAddress Session::GetNetworkAddress()
-{
-    return networkAddress;
-}
-
-SOCKET Session::GetSocket()
-{
-    return socket;
 }

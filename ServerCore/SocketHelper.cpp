@@ -84,3 +84,8 @@ bool SocketHelper::SetTcpNoDelay(SOCKET socket, bool enable)
 {
 	return setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (char*)&enable, sizeof(enable)) != SOCKET_ERROR;
 }
+
+bool SocketHelper::SetUpdateAcceptSocket(SOCKET socket, SOCKET listenSocket)
+{
+	return setsockopt(socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char*)&listenSocket, sizeof(listenSocket)) != SOCKET_ERROR;
+}

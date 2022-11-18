@@ -6,6 +6,7 @@ public:
 	virtual HANDLE GetHandle() abstract;
 	virtual void Observe(class IocpEvent* iocpEvent, int32 bytes = 0) abstract;
 };
+
 class IocpCore
 {
 private:
@@ -19,3 +20,5 @@ public:
 	bool Observe(uint32 time = INFINITY);
 };
 
+//관리 해줄 애로 옮길 예정
+extern IocpCore GIocpCore;
