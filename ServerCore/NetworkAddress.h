@@ -1,9 +1,8 @@
 #pragma once
 class NetworkAddress
 {
-private:
+public:
 	SOCKADDR_IN service = {};
-
 public:
 	NetworkAddress() = default;
 	NetworkAddress(SOCKADDR_IN sockAddrIn);
@@ -12,5 +11,6 @@ public:
 	SOCKADDR_IN& GetSockAddrIn();
 	wstring GetIp();
 	uint16 GetPort();
+
 };
 

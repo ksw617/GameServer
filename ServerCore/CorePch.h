@@ -12,8 +12,11 @@
 #include <unordered_set>
 
 #include <iostream>
-#include<mutex>
-#include<atomic>
+#include <mutex>
+#include <atomic>
+
+#include <thread>
+#include <functional>
 
 using namespace std;
 
