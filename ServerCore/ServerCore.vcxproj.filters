@@ -31,6 +31,9 @@
     <ClInclude Include="SocketHelper.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="NetworkAddress.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -46,6 +49,9 @@
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="SocketHelper.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkAddress.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
