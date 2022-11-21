@@ -7,6 +7,8 @@
 //27015
 int main()
 {
+	SocketHelper::Init();
+
 	Listener listener;
 	NetworkAddress address(L"127.0.0.1", 27015);
 	listener.StartAccept(address);

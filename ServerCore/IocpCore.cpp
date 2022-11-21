@@ -8,10 +8,7 @@ IocpCore GIocpCore;
 IocpCore::IocpCore()
 {
     iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, NULL);
-    if (iocpHandle != INVALID_HANDLE_VALUE)
-    {
-        CRASH("iocpHandle");
-    }
+    CONDITION_CRASH(iocpHandle != INVALID_HANDLE_VALUE);
 }
 
 IocpCore::~IocpCore()

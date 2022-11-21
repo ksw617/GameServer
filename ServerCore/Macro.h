@@ -10,7 +10,7 @@
 
 #define CONDITION_CRASH(condition)		\
 {										\
-	if (!condition)						\
+	if (!(condition))					\
 	{									\
 		CRASH("CRASH");					\
 		__analysis_assume(condition);	\

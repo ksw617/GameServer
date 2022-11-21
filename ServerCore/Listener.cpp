@@ -12,10 +12,7 @@ HANDLE Listener::GetHandle()
 
 void Listener::Observe(IocpEvent* iocpEvent, int32 bytes)
 {
-    if (iocpEvent->GetType() == IO_TYPE::ACCEPT)
-    {
-        CRASH("Not Accept Type");
-    }
+    CONDITION_CRASH(iocpEvent->GetType() == IO_TYPE::ACCEPT);
     AcceptEvent* acceptEvent = reinterpret_cast<AcceptEvent*>(iocpEvent);
     ProcessAccept(acceptEvent);
 }
