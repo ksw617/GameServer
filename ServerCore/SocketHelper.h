@@ -13,6 +13,13 @@ public:
 	static bool BindAny(SOCKET socket, uint16 port);
 	static bool Listen(SOCKET socket, int32 backlog = SOMAXCONN);
 	static void Close(SOCKET& socket);
+public:
+	static bool SetKeppAlive(SOCKET socket, bool enable);
+	static bool SetLinger(SOCKET socket, uint16 onoff, uint16 time);
+	static bool SetReuseAddress(SOCKET socket, bool enable);
+	static bool SetUpdateAcceptSocket(SOCKET socket, SOCKET listenSocket);
+	static bool SetTcpNoDelay(SOCKET socket, bool enable);
+
 
 };
 

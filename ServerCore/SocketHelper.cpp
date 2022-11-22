@@ -58,3 +58,34 @@ void SocketHelper::Close(SOCKET& socket)
     }
 }
 
+bool SocketHelper::SetKeppAlive(SOCKET socket, bool enable)
+{
+    return setsockopt(socket, SOL_SOCKET, SO_KEEPALIVE, (char*)&enable, sizeof(enable)) != SOCKET_ERROR;
+}
+
+bool SocketHelper::SetLinger(SOCKET socket, uint16 onoff, uint16 time)
+{
+    LINGER linger;
+    linger.l_onoff = onoff;
+    linger.l_linger = time;
+
+    return setsockopt(socket, SOL_SOCKET, SO_LINGER, (char*)&linger, sizeof(linger)) != SOCKET_ERROR;
+}
+
+bool SocketHelper::SetReuseAddress(SOCKET socket, bool enable)
+{
+    return setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, (char*)&enable, sizeof(enable)) != SOCKET_ERROR;
+}
+
+bool SocketHelper::SetUpdateAcceptSocket(SOCKET socket, SOCKET listenSocket)
+{
+    return setsockopt(socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char*)&listenSocket, sizeof(listenSocket)) != SOCKET_ERROR;
+}
+
+
+bool SocketHelper::SetTcpNoDelay(SOCKET socket, bool enable)
+{
+    return setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (char*)&enable, sizeof(enable)) != SOCKET_ERROR;
+}
+
+
