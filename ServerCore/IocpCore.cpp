@@ -14,8 +14,8 @@ bool IocpCore::Register(IocpObject* iocpObj)
 	return CreateIoCompletionPort(iocpObj->GetHandle(), iocpHandle, reinterpret_cast<ULONG_PTR>(iocpObj), NULL);
 }
 
-bool IocpCore::Observe(uint32 time)
-{
+bool IocpCore::Observe(uint32 time)							
+{					
 	DWORD bytesTransferred = 0;
 	IocpObject* iocpObj = nullptr;
 	IocpEvent* iocpEvent = nullptr;
@@ -41,8 +41,8 @@ bool IocpCore::Observe(uint32 time)
 
 IocpCore::IocpCore()
 {
-	iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, NULL);
-	CONDITION_CRASH(iocpHandle != INVALID_HANDLE_VALUE);
+	iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, (u_long)0, 0);
+	CONDITION_CRASH(iocpHandle != NULL);
 }
 
 IocpCore::~IocpCore()

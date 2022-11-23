@@ -22,7 +22,25 @@ void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 
 void Listener::ProcessAccept(AcceptEvent* acceptEvnet)
 {
-    //Todo
+    Session* session = acceptEvnet->GetSession();
+    if (!SocketHelper::SetUpdateAcceptSocket(session->GetSocket(), socket))
+    {
+        RegisterAccept(acceptEvnet);
+        return;
+    }
+
+    SOCKADDR_IN sockAddress;
+    int32 size = sizeof(sockAddress);
+    if (getpeername(session->GetSocket(), reinterpret_cast<SOCKADDR*>(&sockAddress), &size) == SOCKET_ERROR)
+    {
+        RegisterAccept(acceptEvnet);
+        return;
+    }
+    session->SetNetworkAddress(NetworkAddress(sockAddress));
+
+    printf("Client Connected\n");
+
+    RegisterAccept(acceptEvnet);
 
 }
 
@@ -33,7 +51,7 @@ HANDLE Listener::GetHandle()
 
 void Listener::Observe(IocpEvent* iocpEvent, int32 bytes)
 {   
-    CONDITION_CRASH(iocpEvent->GetType() != IO_TYPE::ACCEPT);
+    CONDITION_CRASH(iocpEvent->GetType() == IO_TYPE::ACCEPT);
     AcceptEvent* acceptEvnet = reinterpret_cast<AcceptEvent*>(iocpEvent);
     ProcessAccept(acceptEvnet);
     
@@ -42,32 +60,39 @@ void Listener::Observe(IocpEvent* iocpEvent, int32 bytes)
 bool Listener::StartAccept(NetworkAddress address)
 {
     socket = SocketHelper::CreateSocket();
+    
     if (socket == INVALID_SOCKET)
     {
+        printf("socket error");
         return false;
     }
 
     if (GIocpCore.Register(this) == false)
     {
+        printf("Register error");
         return false;
     }
 
     if (SocketHelper::SetReuseAddress(socket, true) == false)
-    {                                                       
+    {
+        printf("SetReuseAddress error");
         return false;
     }
 
     if (SocketHelper::SetLinger(socket, 0,0) == false)
     {
+        printf("SetLinger error");
         return false;
     }
 
-    if (SocketHelper::BindAny(socket, address.GetPort()) == false)
+    if (SocketHelper::Bind(socket, address) == false)
     {
+        printf("BindAny error");
         return false;
     }
-    if (SocketHelper::Listen(socket, 10) == false)
+    if (SocketHelper::Listen(socket) == false)
     {
+        printf("Listen error");
         return false;
     }
 
@@ -80,8 +105,16 @@ bool Listener::StartAccept(NetworkAddress address)
 
 void Listener::CloseSocket()
 {
+    SocketHelper::Close(socket);
 }
 
 Listener::~Listener()
 {
+    SocketHelper::Close(socket);
+    for (AcceptEvent* acceptEvent : acceptEvents)
+    {
+        delete acceptEvent;
+    }
+
+    acceptEvents.clear();
 }

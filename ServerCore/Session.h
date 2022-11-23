@@ -5,7 +5,7 @@
 class Session : public IocpObject
 {
 public:
-	char recvBuffer[512];
+	char recvBuffer[1024];
 private:
 	SOCKET socket = INVALID_SOCKET;
 	NetworkAddress networkAddress = {};
