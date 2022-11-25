@@ -46,6 +46,10 @@
     <ClInclude Include="Listener.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="RefCounter.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Shared_Ptr.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -78,5 +82,9 @@
     <ClCompile Include="Listener.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="RefCounter.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Shared_Ptr.cpp" />
   </ItemGroup>
 </Project>
