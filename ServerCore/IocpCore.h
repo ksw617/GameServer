@@ -19,6 +19,3 @@ public:
 	IocpCore();
 	~IocpCore();
 };
-
-extern IocpCore GIocpCore;
-

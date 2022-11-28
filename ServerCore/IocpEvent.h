@@ -18,18 +18,13 @@ public:
 	IO_TYPE GetType();
 public:
 	IocpEvent(IO_TYPE _type);
+	shared_ptr<class IocpObject> owner;
 };
-
-
-class Session;
 
 class AcceptEvent : public IocpEvent
 {
-private:
-	Session* session = nullptr;
 public:
-	void SetSession(Session* _session) { session = _session; }
-	Session* GetSession() { return session; }
+	shared_ptr<class Session> session = nullptr;
 public:
 	AcceptEvent() : IocpEvent(IO_TYPE::ACCEPT) {}
 
