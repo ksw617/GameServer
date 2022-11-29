@@ -15,13 +15,14 @@ bool IocpCore::Register(IocpObject* iocpObj)
 }
 
 bool IocpCore::Observe(uint32 time)							
-{					
+{
 	DWORD bytesTransferred = 0;
 	IocpObject* iocpObj = nullptr;
 	IocpEvent* iocpEvent = nullptr;
 
 	if (GetQueuedCompletionStatus(iocpHandle, &bytesTransferred, reinterpret_cast<ULONG_PTR*>(&iocpObj), reinterpret_cast<LPOVERLAPPED*>(&iocpEvent), time))
 	{
+		
 		iocpObj->Observe(iocpEvent, bytesTransferred);
 	}
 	else

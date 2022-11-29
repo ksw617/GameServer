@@ -31,6 +31,6 @@ public:
 	void SetSession(Session* _session) { session = _session; }
 	Session* GetSession() { return session; }
 public:
-	AcceptEvent() : IocpEvent(IO_TYPE::ACCEPT) {}
+	AcceptEvent() : IocpEvent(IO_TYPE::ACCEPT) { }
 
 };

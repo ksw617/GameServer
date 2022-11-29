@@ -14,11 +14,11 @@ void IocpEvent::Init()
 
 IO_TYPE IocpEvent::GetType()
 {
-    return IO_TYPE();
+    return type;
 }
 
 IocpEvent::IocpEvent(IO_TYPE _type)
 {
+    Init();                                          
     type = _type;
-    Init();
 }
