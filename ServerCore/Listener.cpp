@@ -6,9 +6,9 @@
 
 void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 {
-    shared_ptr<Session> session;
+    Session* session = new Session;
     acceptEvent->Init();
-    acceptEvent->session = session;
+    acceptEvent->SetSession(session);
 
     DWORD dwBytes = 0;
     if (!SocketHelper::lpfnAcceptEx(socket, session->GetSocket(), session->recvBuffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &dwBytes, reinterpret_cast<LPOVERLAPPED>(acceptEvent)))
@@ -22,7 +22,7 @@ void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 
 void Listener::ProcessAccept(AcceptEvent* acceptEvnet)
 {
-    shared_ptr<Session> session = acceptEvnet->session;
+    Session* session = acceptEvnet->GetSession();
     if (!SocketHelper::SetUpdateAcceptSocket(session->GetSocket(), socket))
     {
         RegisterAccept(acceptEvnet);
