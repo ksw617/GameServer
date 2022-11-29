@@ -49,7 +49,14 @@
     <ClInclude Include="RefCounter.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Shared_Ptr.h" />
+    <ClInclude Include="Shared_Ptr.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Service.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerService.h" />
+    <ClInclude Include="ClientService.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -85,6 +92,13 @@
     <ClCompile Include="RefCounter.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Shared_Ptr.cpp" />
+    <ClCompile Include="Shared_Ptr.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Service.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerService.cpp" />
+    <ClCompile Include="ClientService.cpp" />
   </ItemGroup>
 </Project>

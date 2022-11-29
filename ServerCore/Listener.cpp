@@ -3,12 +3,13 @@
 #include "SocketHelper.h"
 #include "IocpEvent.h"
 #include "Session.h"
+#include "ServerService.h" //호출
 
 void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 {
-    Session* session = new Session;
+    shared_ptr<Session> session = make_shared<Session>();
     acceptEvent->Init();
-    acceptEvent->SetSession(session);
+    acceptEvent->session = session;
 
     DWORD dwBytes = 0;
     if (!SocketHelper::lpfnAcceptEx(socket, session->GetSocket(), session->recvBuffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &dwBytes, reinterpret_cast<LPOVERLAPPED>(acceptEvent)))
@@ -22,7 +23,7 @@ void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 
 void Listener::ProcessAccept(AcceptEvent* acceptEvnet)
 {
-    Session* session = acceptEvnet->GetSession();
+    shared_ptr<Session> session = acceptEvnet->session;
     if (!SocketHelper::SetUpdateAcceptSocket(session->GetSocket(), socket))
     {
         RegisterAccept(acceptEvnet);
@@ -50,24 +51,25 @@ HANDLE Listener::GetHandle()
 }
 
 void Listener::Observe(IocpEvent* iocpEvent, int32 bytes)
-{   
+{
     CONDITION_CRASH(iocpEvent->GetType() == IO_TYPE::ACCEPT);
     AcceptEvent* acceptEvnet = reinterpret_cast<AcceptEvent*>(iocpEvent);
     ProcessAccept(acceptEvnet);
-    
+
 }
 
-bool Listener::StartAccept(NetworkAddress address)
+bool Listener::StartAccept(shared_ptr<ServerService> _service)
 {
     socket = SocketHelper::CreateSocket();
-    
+
     if (socket == INVALID_SOCKET)
     {
         printf("socket error");
         return false;
     }
 
-    if (GIocpCore.Register(this) == false)
+    //수정
+    if (service->GetIocpCore()->Register(shared_from_this()) == false)
     {
         printf("Register error");
         return false;
@@ -79,13 +81,14 @@ bool Listener::StartAccept(NetworkAddress address)
         return false;
     }
 
-    if (SocketHelper::SetLinger(socket, 0,0) == false)
+    if (SocketHelper::SetLinger(socket, 0, 0) == false)
     {
         printf("SetLinger error");
         return false;
     }
 
-    if (SocketHelper::Bind(socket, address) == false)
+    //수정
+    if (SocketHelper::Bind(socket, service->GetNetworkAddress()) == false)
     {
         printf("BindAny error");
         return false;
@@ -97,6 +100,7 @@ bool Listener::StartAccept(NetworkAddress address)
     }
 
     AcceptEvent* acceptEvent = new AcceptEvent;
+    acceptEvent->owner = shared_from_this();
     acceptEvents.push_back(acceptEvent);
     RegisterAccept(acceptEvent);
 

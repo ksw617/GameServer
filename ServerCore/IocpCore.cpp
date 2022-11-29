@@ -2,27 +2,27 @@
 #include "IocpCore.h"
 #include "IocpEvent.h"
 
-IocpCore GIocpCore;
 
 HANDLE IocpCore::GetHandle()
 {
 	return iocpHandle;
 }
 
-bool IocpCore::Register(IocpObject* iocpObj)
+bool IocpCore::Register(shared_ptr<IocpObject> iocpObj)
 {
-	return CreateIoCompletionPort(iocpObj->GetHandle(), iocpHandle, reinterpret_cast<ULONG_PTR>(iocpObj), NULL);
+	//Key´Â NULL·Î
+	return CreateIoCompletionPort(iocpObj->GetHandle(), iocpHandle, NULL, NULL);
 }
 
 bool IocpCore::Observe(uint32 time)							
 {
 	DWORD bytesTransferred = 0;
-	IocpObject* iocpObj = nullptr;
+	ULONG_PTR key = 0;
 	IocpEvent* iocpEvent = nullptr;
 
-	if (GetQueuedCompletionStatus(iocpHandle, &bytesTransferred, reinterpret_cast<ULONG_PTR*>(&iocpObj), reinterpret_cast<LPOVERLAPPED*>(&iocpEvent), time))
+	if (GetQueuedCompletionStatus(iocpHandle, &bytesTransferred, &key, reinterpret_cast<LPOVERLAPPED*>(&iocpEvent), time))
 	{
-		
+		shared_ptr<IocpObject> iocpObj = iocpEvent->owner;
 		iocpObj->Observe(iocpEvent, bytesTransferred);
 	}
 	else
@@ -32,6 +32,7 @@ bool IocpCore::Observe(uint32 time)
 		case WAIT_TIMEOUT:
 			return false;
 		default:
+			shared_ptr<IocpObject> iocpObj = iocpEvent->owner;
 			iocpObj->Observe(iocpEvent, bytesTransferred);
 			break;
 		}

@@ -2,17 +2,24 @@
 #include "SocketHelper.h"
 #include "Listener.h"
 
+#include "ServerService.h"
+#include "Session.h"
+
 int main()
 {
 	SocketHelper::Init();
 
-	Listener listener;
-	NetworkAddress address(L"127.0.0.1", 27015);
-	CONDITION_CRASH(listener.StartAccept(address));
+	shared_ptr<ServerService> service = make_shared<ServerService>
+		(
+		NetworkAddress(L"127.0.0.1", 27015),
+		make_shared<IocpCore>(),
+		[]() {return make_shared<Session>(); });
+	
+	CONDITION_CRASH(service->Start());
 
 	while (true)
 	{
-		GIocpCore.Observe();
+		service->GetIocpCore()->Observe();
 
 	}
 

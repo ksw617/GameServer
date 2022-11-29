@@ -1,6 +1,6 @@
 #pragma once
 
-class IocpObject
+class IocpObject : public enable_shared_from_this<IocpObject>
 {
 public:
 	virtual HANDLE GetHandle() abstract;
@@ -13,12 +13,10 @@ private:
 	HANDLE iocpHandle;
 public:
 	HANDLE GetHandle();
-	bool Register(class IocpObject* iocpObj);
+	bool Register(shared_ptr<IocpObject> iocpObj);
 	bool Observe(uint32 time = INFINITY);
 public:
 	IocpCore();
 	~IocpCore();
 };
-
-extern IocpCore GIocpCore;
 
