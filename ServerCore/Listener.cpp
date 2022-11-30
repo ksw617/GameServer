@@ -60,6 +60,12 @@ void Listener::Observe(IocpEvent* iocpEvent, int32 bytes)
 
 bool Listener::StartAccept(shared_ptr<ServerService> _service)
 {
+    service = _service;
+    if (service == nullptr)
+    {
+        return false;
+    }
+
     socket = SocketHelper::CreateSocket();
 
     if (socket == INVALID_SOCKET)
@@ -68,7 +74,7 @@ bool Listener::StartAccept(shared_ptr<ServerService> _service)
         return false;
     }
 
-    //¼öÁ¤
+
     if (service->GetIocpCore()->Register(shared_from_this()) == false)
     {
         printf("Register error");
