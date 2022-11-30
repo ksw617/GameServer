@@ -31,3 +31,17 @@ public:
 	AcceptEvent() : IocpEvent(IO_TYPE::ACCEPT) { }
 
 };
+
+class RecvEvent : public IocpEvent
+{
+public:
+	RecvEvent() : IocpEvent(IO_TYPE::RECV) {}
+};
+
+class SendEvent : public IocpEvent
+{
+public:
+	vector<BYTE> buffer;
+public:
+	SendEvent() : IocpEvent(IO_TYPE::SEND) {}
+};

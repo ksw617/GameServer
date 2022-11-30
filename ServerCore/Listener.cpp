@@ -3,47 +3,10 @@
 #include "SocketHelper.h"
 #include "IocpEvent.h"
 #include "Session.h"
-#include "ServerService.h" //호출
+#include "ServerService.h" 
 
-void Listener::RegisterAccept(AcceptEvent* acceptEvent)
-{
-    shared_ptr<Session> session = make_shared<Session>();
-    acceptEvent->Init();
-    acceptEvent->session = session;
 
-    DWORD dwBytes = 0;
-    if (!SocketHelper::lpfnAcceptEx(socket, session->GetSocket(), session->recvBuffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &dwBytes, reinterpret_cast<LPOVERLAPPED>(acceptEvent)))
-    {
-        if (WSAGetLastError() != WSA_IO_PENDING)
-        {
-            RegisterAccept(acceptEvent);
-        }
-    }
-}
 
-void Listener::ProcessAccept(AcceptEvent* acceptEvnet)
-{
-    shared_ptr<Session> session = acceptEvnet->session;
-    if (!SocketHelper::SetUpdateAcceptSocket(session->GetSocket(), socket))
-    {
-        RegisterAccept(acceptEvnet);
-        return;
-    }
-
-    SOCKADDR_IN sockAddress;
-    int32 size = sizeof(sockAddress);
-    if (getpeername(session->GetSocket(), reinterpret_cast<SOCKADDR*>(&sockAddress), &size) == SOCKET_ERROR)
-    {
-        RegisterAccept(acceptEvnet);
-        return;
-    }
-    session->SetNetworkAddress(NetworkAddress(sockAddress));
-
-    printf("Client Connected\n");
-
-    RegisterAccept(acceptEvnet);
-
-}
 
 HANDLE Listener::GetHandle()
 {
@@ -93,7 +56,6 @@ bool Listener::StartAccept(shared_ptr<ServerService> _service)
         return false;
     }
 
-    //수정
     if (SocketHelper::Bind(socket, service->GetNetworkAddress()) == false)
     {
         printf("BindAny error");
@@ -111,6 +73,50 @@ bool Listener::StartAccept(shared_ptr<ServerService> _service)
     RegisterAccept(acceptEvent);
 
     return true;
+}
+
+
+void Listener::RegisterAccept(AcceptEvent* acceptEvent)
+{
+    //변경
+    shared_ptr<Session> session = service->CreateSession();
+    acceptEvent->Init();
+    acceptEvent->session = session;
+
+    DWORD dwBytes = 0;
+    if (!SocketHelper::lpfnAcceptEx(socket, session->GetSocket(), session->recvBuffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &dwBytes, reinterpret_cast<LPOVERLAPPED>(acceptEvent)))
+    {
+        if (WSAGetLastError() != WSA_IO_PENDING)
+        {
+            RegisterAccept(acceptEvent);
+        }
+    }
+}
+
+void Listener::ProcessAccept(AcceptEvent* acceptEvnet)
+{
+    shared_ptr<Session> session = acceptEvnet->session;
+    if (!SocketHelper::SetUpdateAcceptSocket(session->GetSocket(), socket))
+    {
+        RegisterAccept(acceptEvnet);
+        return;
+    }
+
+    SOCKADDR_IN sockAddress;
+    int32 size = sizeof(sockAddress);
+    if (getpeername(session->GetSocket(), reinterpret_cast<SOCKADDR*>(&sockAddress), &size) == SOCKET_ERROR)
+    {
+        RegisterAccept(acceptEvnet);
+        return;
+    }
+    session->SetNetworkAddress(NetworkAddress(sockAddress));
+
+    printf("Client Connected\n");
+    //호출
+    session->ProcessConnect();
+
+    RegisterAccept(acceptEvnet);
+
 }
 
 void Listener::CloseSocket()

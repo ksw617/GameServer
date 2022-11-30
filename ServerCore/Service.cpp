@@ -24,6 +24,8 @@ void Service::EndService()
 shared_ptr<Session> Service::CreateSession()
 {
 	shared_ptr<Session> session = sessionFactory();	//return shared_ptr<Session>;
+	//Ãß°¡
+	session->SetService(shared_from_this());
 	if (iocpCore->Register(session) == false)
 	{
 		return nullptr;
@@ -33,6 +35,7 @@ shared_ptr<Session> Service::CreateSession()
 
 void Service::AddSession(shared_ptr<Session> session)
 {
+
 	lock_guard<mutex> guard(lock);
 	sessionCount++;
 	sessions.insert(session);
