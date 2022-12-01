@@ -5,7 +5,6 @@
 
 Service::Service(SERVICE_TYPE _type, NetworkAddress _address, shared_ptr<IocpCore> _core, SessionFactory _factory)
 {
-	printf("type : %d\n", _type);
 	type = _type;
 	address = _address;
 	iocpCore = _core;

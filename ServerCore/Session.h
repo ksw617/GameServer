@@ -10,7 +10,6 @@ class Session : public IocpObject
 	friend class Service;
 
 public:
-	//변경
 	BYTE recvBuffer[1024] = {};
 private:
 	mutex lock;	
@@ -35,18 +34,23 @@ public:
 	shared_ptr<Session> GetSession() { return static_pointer_cast<Session>(shared_from_this()); }
 private:
 	void RegisterRecv();
-	//추가
 	void RegisterSend(SendEvent* sendEvent);
 
 	void ProcessConnect();
 	void ProcessRecv(int32 bytes);
-	//추가
 	void ProcessSend(SendEvent* sendEvent, int32 bytes);
+
 	void HandleError(int32 error);
 
 public:
 	void Send(BYTE* buffer, int32 len);
 	void Disconnect(const WCHAR* cause);
+protected:
+	 //GameServer or GameClient 에서 사용할 애들
+	virtual void OnConnected() {}
+	virtual void OnDisconnected() {}
+	virtual int32 OnRecv(BYTE* buffer, int32 len) { return len; }
+	virtual void OnSend(int32 len) {}
 public:
 	Session();
 	~Session();
