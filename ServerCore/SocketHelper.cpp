@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "SocketHelper.h"
 
-
+//초기화
+LPFN_CONNECTEX SocketHelper::lpfnConnectEx = NULL;
 LPFN_ACCEPTEX SocketHelper::lpfnAcceptEx = NULL;
 
 void SocketHelper::Init()
@@ -9,8 +10,14 @@ void SocketHelper::Init()
     WSAData wsaData;
     CONDITION_CRASH(WSAStartup(MAKEWORD(2, 2), &wsaData) == NO_ERROR);
 
-    SOCKET sock = CreateSocket();
-    CONDITION_CRASH(SocketMode(sock, WSAID_ACCEPTEX, reinterpret_cast<LPVOID*>(&lpfnAcceptEx)));
+    //임시로 만든거라 이름변경
+    SOCKET tempSocket = CreateSocket();
+    //ConnectEx 정해주고
+    CONDITION_CRASH(SocketMode(tempSocket, WSAID_CONNECTEX, reinterpret_cast<LPVOID*>(&lpfnConnectEx)));
+    CONDITION_CRASH(SocketMode(tempSocket, WSAID_ACCEPTEX, reinterpret_cast<LPVOID*>(&lpfnAcceptEx)));
+
+    //정리
+    Close(tempSocket);
 }
 
 void SocketHelper::Clear()

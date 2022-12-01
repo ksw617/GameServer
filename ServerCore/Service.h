@@ -5,8 +5,8 @@
 
 enum class SERVICE_TYPE : uint8
 {
-	Server,
-	Client,
+	SERVER,
+	CLIENT,
 };
 
 class IocpCore;
