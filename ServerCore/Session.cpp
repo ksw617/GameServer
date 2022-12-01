@@ -81,10 +81,6 @@ void Session::RegisterRecv()
 
 }
 
-void Session::ProcessSend(SendEvent* sendEvent, in)
-{
-}
-
 
 void Session::ProcessRecv(int32 bytes)
 {
@@ -118,6 +114,10 @@ Session::Session()
 Session::~Session()
 {
 	SocketHelper::Close(socket);
+}
+
+void Session::ProcessSend(SendEvent* sendEvent, int32 bytes)
+{
 }
 
 void Session::HandleError(int32 error)
