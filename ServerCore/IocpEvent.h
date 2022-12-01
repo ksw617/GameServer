@@ -6,6 +6,8 @@ enum class IO_TYPE : uint8
 	ACCEPT,
 	RECV, 
 	SEND,
+	//추가
+	DISCONNECT,
 
 };
 
@@ -21,6 +23,12 @@ public:
 	shared_ptr<class IocpObject> owner;
 };
 
+class ConnectEvent : public IocpEvent
+{
+public:
+	ConnectEvent() : IocpEvent(IO_TYPE::CONNECT) { }
+
+};
 
 class AcceptEvent : public IocpEvent
 {
@@ -44,4 +52,12 @@ public:
 	vector<BYTE> buffer;
 public:
 	SendEvent() : IocpEvent(IO_TYPE::SEND) {}
+};
+
+//Disonnect event 추가
+class DisconnectEvent : public IocpEvent
+{
+public:
+	DisconnectEvent() : IocpEvent(IO_TYPE::DISCONNECT) { }
+
 };

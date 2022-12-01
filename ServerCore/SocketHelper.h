@@ -3,7 +3,12 @@
 class SocketHelper
 {
 public:
-	static LPFN_ACCEPTEX lpfnAcceptEx;
+	//Rename
+	static LPFN_CONNECTEX ConnectEx;
+	//DisConnect Ãß°¡
+	static LPFN_DISCONNECTEX DisconnectEx;
+	//Rename
+	static LPFN_ACCEPTEX AcceptEx;
 public:
 	static void Init();
 	static void Clear();

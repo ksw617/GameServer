@@ -84,7 +84,7 @@ void Listener::RegisterAccept(AcceptEvent* acceptEvent)
     acceptEvent->session = session;
 
     DWORD dwBytes = 0;
-    if (!SocketHelper::lpfnAcceptEx(socket, session->GetSocket(), session->recvBuffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &dwBytes, reinterpret_cast<LPOVERLAPPED>(acceptEvent)))
+    if (!SocketHelper::AcceptEx(socket, session->GetSocket(), session->recvBuffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &dwBytes, reinterpret_cast<LPOVERLAPPED>(acceptEvent)))
     {
         if (WSAGetLastError() != WSA_IO_PENDING)
         {

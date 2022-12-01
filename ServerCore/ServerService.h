@@ -7,7 +7,7 @@ private:
 
 public:
 	ServerService(NetworkAddress _address, shared_ptr<IocpCore> _core, SessionFactory _factory)
-		:Service::Service(SERVICE_TYPE::Server, _address, _core, _factory) { }
+		:Service::Service(SERVICE_TYPE::SERVER, _address, _core, _factory) { }
 	~ServerService() {}
 public:
 	virtual bool Start() override;
