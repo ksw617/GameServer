@@ -67,8 +67,48 @@ void Session::ProcessRecv(int32 bytes)
 		Disconnect(L"Recv Data 0");
 		return;
 	}
+	//bytes만큼 써주기
+	if (recvBuffer.OnWrite(bytes) == false)
+	{
+		//문제있음 Disconnect
+		Disconnect(L"OnWrite overflow");
+		return;
+	}
 
-	OnRecv(recvBuffer, bytes);
+	//읽어야 할 데이터 크기
+	int32 dataSize = recvBuffer.DataSize();
+
+	//r-w 사이의 데이터 읽기
+	//처리한 길이를 processLen로 읽어 줄꺼임
+	int32 processLen = OnRecv(recvBuffer.ReadPos(), bytes);
+
+	//처리한게 0이하라면 문제
+	if(processLen < 0)
+	{
+		//문제있음 Disconnect
+		Disconnect(L"OnWrite overflow");
+		return;
+	}
+
+	//처리한 데이터가 처리해야할 데이터 보다 크다면
+	if (dataSize < processLen)
+	{
+		//문제있음 Disconnect
+		Disconnect(L"OnWrite overflow");
+		return;
+	}
+
+	//위치 이동 시켜주지 못하면 에러
+	if (recvBuffer.OnRead(processLen) == false)
+	{
+		//문제있음 Disconnect
+		Disconnect(L"OnWrite overflow");
+		return;
+	}
+
+	//위치 정리
+	recvBuffer.Clean();
+
 
 	RegisterRecv();
 }
@@ -170,28 +210,20 @@ void Session::RegisterSend(SendEvent* sendEvent)
 
 bool Session::RegisterDisconnect()
 {
-	//이벤트 초기화
 	disconnectEvent.Init();
-	//내 Session 연결
 	disconnectEvent.owner = shared_from_this();
 
-	//연결끊기
-	//TF_REUSE_SOCKET : 소켓을 재활용 하겟다
 	if (false == (SocketHelper::DisconnectEx(socket, &disconnectEvent, TF_REUSE_SOCKET, NULL)))
 	{
 
-		//기다리는중이 아니라면
 		if (WSAGetLastError() != WSA_IO_PENDING)
 		{
-			//진짜 에러 
-			//밀어 버리고
 			disconnectEvent.owner = nullptr;
 			return false;
 
 		}
 	}
 
-	//성공
 	return true;
 }
 
@@ -210,8 +242,10 @@ void Session::RegisterRecv()
 	recvEvent.owner = shared_from_this();
 
 	WSABUF dataBuf;
-	dataBuf.buf = reinterpret_cast<char*>(recvBuffer);
-	dataBuf.len = sizeof(recvBuffer);
+	//recvBuffer의 시작점
+	dataBuf.buf = reinterpret_cast<char*>(recvBuffer.WritePos());
+	//남아있는 공간
+	dataBuf.len = recvBuffer.FreeSize();
 
 	DWORD recvBytes = 0;
 	DWORD flags = 0;
@@ -229,7 +263,8 @@ void Session::RegisterRecv()
 
 }
 
-Session::Session()
+//64kb
+Session::Session() : recvBuffer(4096)
 {
 	socket = SocketHelper::CreateSocket();
 }
@@ -261,15 +296,11 @@ void Session::Disconnect(const WCHAR* cause)
 		return;
 	}
 
-	printf("Disconnect : %ws", cause);
+	printf("Disconnect : %ws\n", cause);
 
-	//오버라이드 된거 호출
 	OnDisconnected();
-
-	//SocketHelper::Close(socket);
 	
 	GetService()->RemoveSession(GetSession());
 
-	//호출
 	RegisterDisconnect();
 }

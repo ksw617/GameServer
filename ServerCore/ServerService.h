@@ -11,7 +11,7 @@ public:
 	~ServerService() {}
 public:
 	virtual bool Start() override;
-	virtual void EndService();
+	virtual void EndService() override;
 
 };
 

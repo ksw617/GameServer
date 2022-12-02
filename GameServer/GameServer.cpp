@@ -1,7 +1,5 @@
 #include "pch.h"
 #include "SocketHelper.h"
-#include "Listener.h"
-
 #include "ServerService.h"
 #include "Session.h"
 #include "ThreadManager.h"
@@ -9,9 +7,15 @@
 class GameSession : public Session
 {
 public:
+	~GameSession()
+	{
+		printf("¼Ò¸ê\n");
+	}
+
 	virtual int32 OnRecv(BYTE* buffer, int32 len) override
 	{
 		printf("Recv Data Length : %d byte\n", len);
+		printf("Recv Data : %s\n", (char*)buffer);
 		Send(buffer, len);
 		return len;
 	}

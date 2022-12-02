@@ -55,8 +55,13 @@
     <ClInclude Include="Service.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="ServerService.h" />
-    <ClInclude Include="ClientService.h" />
+    <ClInclude Include="ClientService.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerService.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="RecvBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -98,7 +103,12 @@
     <ClCompile Include="Service.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="ServerService.cpp" />
-    <ClCompile Include="ClientService.cpp" />
+    <ClCompile Include="ClientService.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerService.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="RecvBuffer.cpp" />
   </ItemGroup>
 </Project>

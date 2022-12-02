@@ -2,6 +2,7 @@
 #include "IocpCore.h"
 #include "IocpEvent.h"
 #include "NetworkAddress.h"
+#include "RecvBuffer.h"		   //추가
 
 class Session : public IocpObject
 {
@@ -10,10 +11,12 @@ class Session : public IocpObject
 	friend class Service;
 
 public:
-	BYTE recvBuffer[1024] = {};
+	//삭제
+	//BYTE recvBuffer[1024] = {};
+	//추가
+	RecvBuffer recvBuffer;
 private:
 	ConnectEvent connectEvent;
-	//DisconnectEvent 추가
 	DisconnectEvent disconnectEvent;
 	RecvEvent recvEvent;
 private:
@@ -46,13 +49,11 @@ private:
 	bool RegisterConnect();
 	void RegisterRecv();
 	void RegisterSend(SendEvent* sendEvent);
-	//추가
 	bool RegisterDisconnect();
 
 	void ProcessConnect();
 	void ProcessRecv(int32 bytes);
 	void ProcessSend(SendEvent* sendEvent, int32 bytes);
-	//추가
 	void ProcessDisConnect();
 
 	void HandleError(int32 error);

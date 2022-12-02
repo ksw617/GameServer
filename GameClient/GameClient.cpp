@@ -1,122 +1,75 @@
 #include "pch.h"
 
-#include <WinSock2.h>
-#include <WS2tcpip.h>
-#pragma comment(lib, "ws2_32.lib")
+#include <SocketHelper.h>
+#include <ThreadManager.h>
+#include <ClientService.h>
+#include <Session.h>
 
-#include <thread>
-using namespace this_thread;
+char sendBuffer[] = "Hello world";
 
+class GameSession : public Session
+{
+public:
+	~GameSession()
+	{
+		printf("소멸\n");
+	}
+public:
+	virtual void OnConnected() override
+	{
+		printf("Connected to Server\n");
+		Send((BYTE*)sendBuffer, sizeof(sendBuffer));
+	}
+
+	virtual int32 OnRecv(BYTE* buffer, int32 len) override
+	{
+		printf("OnRecv Length : %d bytes\n", len);
+
+		this_thread::sleep_for(1s);
+
+		Send((BYTE*)sendBuffer, sizeof(sendBuffer));
+		return len;
+	}
+
+	virtual void OnSend(int32 len) override
+	{
+		printf("OnSend Length : %d bytes\n", len);
+	}
+
+	virtual void OnDisconnected() override
+	{
+		printf("Disconnected\n");
+	}
+
+};
 
 int main()
 {
-	WORD wVersionRequested = MAKEWORD(2, 2);
-	WSAData wsaData;
+	ThreadManager* threadManager = new ThreadManager();
+	SocketHelper::Init();
 
-	if (WSAStartup(wVersionRequested, &wsaData) != 0)
-	{
-		printf("WSAStartup 에러\n");
-		return -1;
-	}
+	this_thread::sleep_for(1s);
 
-	SOCKET connectSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (connectSocket == INVALID_SOCKET)
-	{
-		printf("소켓 에러 %d\n", WSAGetLastError());
-		WSACleanup();
-		return -1;
-	}
+	shared_ptr<ClientService> service = make_shared<ClientService>
+		(
+			NetworkAddress(L"127.0.0.1", 27015),
+			make_shared<IocpCore>(),
+			[]() {return make_shared<GameSession>(); }
+	);
 
+	CONDITION_CRASH(service->Start());
 
-
-
-	u_long on = 1;
-	if (ioctlsocket(connectSocket, FIONBIO, &on) == INVALID_SOCKET)
-	{
-		printf("ioctlsocket 에러 %d\n", WSAGetLastError());
-		closesocket(connectSocket);
-		WSACleanup();
-		return -1;
-	}
-
-
-	SOCKADDR_IN service;
-	memset(&service, 0, sizeof(service));
-	service.sin_family = AF_INET;
-	inet_pton(AF_INET, "127.0.0.1", &service.sin_addr);
-	service.sin_port = htons(27015);
-
-	while (true)
-	{
-		if (connect(connectSocket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
+	threadManager->Call([=]()
 		{
-			if (WSAGetLastError() == WSAEWOULDBLOCK)
+			while (true)
 			{
-				continue;
+				service->GetIocpCore()->Observe();
 			}
+		});
 
-			if (WSAGetLastError() == WSAEALREADY)
-			{
-				continue;
-			}
+	threadManager->Join();
 
-			if (WSAGetLastError() == WSAEISCONN)
-			{
-				break;
-			}
-
-			printf("connect 에러 %d\n", WSAGetLastError());
-			closesocket(connectSocket);
-			WSACleanup();
-			return -1;
-			
-		}
-	}
-
-	printf("Connected To server!\n");
-	
-	char sendBuffer[100] = "Hello This is Client!";
-	WSAOVERLAPPED overlaped = {};
-	WSAEVENT wsaEvent = WSACreateEvent();
-	overlaped.hEvent = wsaEvent;
-	
-
-	while (true)
-	{
-		WSABUF wsaBuf;
-		wsaBuf.buf = sendBuffer;
-		wsaBuf.len = sizeof(sendBuffer);
-
-		DWORD sendLen = 0;
-		DWORD flags = 0;
-
-		if (WSASend(connectSocket, &wsaBuf, 1, &sendLen, flags, &overlaped, nullptr) == SOCKET_ERROR)
-		{
-			if (WSAGetLastError() == WSA_IO_PENDING)
-			{
-				//기다림
-				WSAWaitForMultipleEvents(1, &wsaEvent, TRUE, WSA_INFINITE, FALSE);
-				if (WSAGetOverlappedResult(connectSocket, &overlaped, &sendLen, FALSE, &flags))
-				{
-					printf("Overlapped Result : ");
-				}
-			}
-			else
-			{
-				//문제 있는 상황
-				break;
-			}
-		}
-
-		printf("Send Buffer Length : %d byte\n", sizeof(sendBuffer));
-
-		sleep_for(1s);
-	}
-
-	WSACloseEvent(wsaEvent);
-	
-	closesocket(connectSocket);
-	WSACleanup();
+	delete threadManager;
 	return 0;
 
 }
