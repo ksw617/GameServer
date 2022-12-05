@@ -3,10 +3,12 @@
 
 RecvBuffer::RecvBuffer(int32 _bufferSize)
 {
-    //bufferSize에 초기화
     bufferSize = _bufferSize;
-    //buffer 크기값 할당
-    buffer.resize(bufferSize);
+
+    //버퍼크기를 늘림
+    capacity = bufferSize * BufferCount;
+    //버퍼의 크기는 capacity 만큼
+    buffer.resize(capacity);
 }
 
 RecvBuffer::~RecvBuffer()
@@ -15,41 +17,29 @@ RecvBuffer::~RecvBuffer()
 
 void RecvBuffer::Clean()
 {
-    //[][][][Data Size ][Free Size     ]
-    //[][][][r][][][][w][][][][][][][][]
     int32 dataSize = DataSize();
-    //[][][][][][][][  Free Size     ]
-    //[][][][][][][][rw][][][][][][][][]
+    //위치가 같은 확률이 높아짐
     if (dataSize == 0)
     {
         readPos = 0;
         writePos = 0;
-    //[  Free Size                     ]
-    //[rw][][][][][][][][][][][][][][][]
     }
-    //[][][][Data Size ][Free Size     ]
-    //[][][][r][][][][w][][][][][][][][]
     else
-        //[ ][][][Data Size ][Free Size     ]
-        //[&][][][&][][][][w][][][][][][][][]
-    {   //[0][][][r][][][][w][][][][][][][][]
-
-        //[   ][ ][ ][r 1][2  ][3][4][w][][][][][][][][]
-        memcpy(&buffer[0], &buffer[readPos], dataSize);
-        //[   ][ ][ ][   ][ 덮어 쓸꺼라 값들이 있어서 상관 없음] 
-        //[r 1][2][3][4  ][w 2][3][4][][][][][][][][][][][]
-        //readPos 초기화
-        readPos = 0;
-        //writePos는 0에서 부터 dataSize 위치
-        writePos = dataSize;
-
+    {  
+        //여유공간 보다 써야될 공간이 적을 경우에만
+        if (FreeSize() < bufferSize)
+        {
+            //메모리 복사가 이루어짐
+            memcpy(&buffer[0], &buffer[readPos], dataSize);
+            readPos = 0;
+            writePos = dataSize;
+        }
     }
 
 }
 
 bool RecvBuffer::OnRead(int32 bytes)
 {
-    //문제있는 상황
     if (bytes > DataSize())
     {
         return false;
@@ -61,7 +51,6 @@ bool RecvBuffer::OnRead(int32 bytes)
 
 bool RecvBuffer::OnWrite(int32 bytes)
 {
-    //문제있는 상황
     if (bytes > FreeSize())
     {
         return false;

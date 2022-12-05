@@ -61,7 +61,10 @@
     <ClInclude Include="ServerService.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="RecvBuffer.h" />
+    <ClInclude Include="RecvBuffer.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="SendBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -109,6 +112,9 @@
     <ClCompile Include="ServerService.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="RecvBuffer.cpp" />
+    <ClCompile Include="RecvBuffer.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="SendBuffer.cpp" />
   </ItemGroup>
 </Project>

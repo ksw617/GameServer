@@ -3,6 +3,7 @@
 #include "ServerService.h"
 #include "Session.h"
 #include "ThreadManager.h"
+#include <SendBuffer.h>
 
 class GameSession : public Session
 {
@@ -16,7 +17,14 @@ public:
 	{
 		printf("Recv Data Length : %d byte\n", len);
 		printf("Recv Data : %s\n", (char*)buffer);
-		Send(buffer, len);
+		
+		//sendBuffer 할당
+		shared_ptr<SendBuffer> sendBuffer = make_shared<SendBuffer>(4096);
+		//sendBuffer에 있는 buffer에 받은 버퍼 복사
+		sendBuffer->CopyData(buffer, sizeof(len));
+		//보내기
+		Send(sendBuffer);
+
 		return len;
 	}
 

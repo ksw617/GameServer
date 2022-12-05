@@ -11,14 +11,17 @@ class Session : public IocpObject
 	friend class Service;
 
 public:
-	//삭제
-	//BYTE recvBuffer[1024] = {};
-	//추가
 	RecvBuffer recvBuffer;
+
+	//송신관련
+	queue<shared_ptr<SendBuffer>> sendQueue;
+	atomic<bool> sendRegistered = false;
 private:
 	ConnectEvent connectEvent;
 	DisconnectEvent disconnectEvent;
 	RecvEvent recvEvent;
+	//SendEvent 사용할꺼라 
+	SendEvent sendEvent;
 private:
 	mutex lock;	
 	shared_ptr<class Service> service; 
@@ -32,7 +35,8 @@ public:
 
 public:
 	bool Connect();
-	void Send(BYTE* buffer, int32 len);
+	//Send방식 변경
+	void Send(shared_ptr<SendBuffer> sendBuffer);
 	void Disconnect(const WCHAR* cause);
 
 public:
@@ -48,12 +52,14 @@ public:
 private:
 	bool RegisterConnect();
 	void RegisterRecv();
-	void RegisterSend(SendEvent* sendEvent);
+	//SendEvent 할당할꺼라 안넘겨줘도 됨
+	void RegisterSend();
 	bool RegisterDisconnect();
 
 	void ProcessConnect();
 	void ProcessRecv(int32 bytes);
-	void ProcessSend(SendEvent* sendEvent, int32 bytes);
+	//SendEvent 할당할꺼라 안넘겨줘도 됨
+	void ProcessSend(int32 bytes);
 	void ProcessDisConnect();
 
 	void HandleError(int32 error);

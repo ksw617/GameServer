@@ -4,8 +4,9 @@
 #include <ThreadManager.h>
 #include <ClientService.h>
 #include <Session.h>
+#include <SendBuffer.h>
 
-char sendBuffer[] = "Hello world";
+char sendData[] = "Hello world";
 
 class GameSession : public Session
 {
@@ -18,7 +19,13 @@ public:
 	virtual void OnConnected() override
 	{
 		printf("Connected to Server\n");
-		Send((BYTE*)sendBuffer, sizeof(sendBuffer));
+
+		//sendBuffer 할당
+		shared_ptr<SendBuffer> sendBuffer = make_shared<SendBuffer>(4096);
+		//sendBuffer에 있는 buffer에 sendData에 복사
+		sendBuffer->CopyData(sendData, sizeof(sendData));
+		//보내기
+		Send(sendBuffer);
 	}
 
 	virtual int32 OnRecv(BYTE* buffer, int32 len) override
@@ -27,7 +34,13 @@ public:
 
 		this_thread::sleep_for(1s);
 
-		Send((BYTE*)sendBuffer, sizeof(sendBuffer));
+		//sendBuffer 할당
+		shared_ptr<SendBuffer> sendBuffer = make_shared<SendBuffer>(4096);
+		//sendBuffer에 있는 buffer에 sendData에 복사
+		sendBuffer->CopyData(sendData, sizeof(sendData));
+		//보내기
+		Send(sendBuffer);
+
 		return len;
 	}
 
