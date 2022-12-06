@@ -135,7 +135,8 @@ void Session::Send(shared_ptr<SendBuffer> sendBuffer)
 	//sendEvent->buffer.resize(len);
 	//memcpy(sendEvent->buffer.data(), buffer, len);
 
-	lock_guard<mutex> guard(lock);
+	//lock을 두번 잡아서
+	//lock_guard<mutex> guard(lock);
 
 	//senQueue에 추가
 	sendQueue.push(sendBuffer);
