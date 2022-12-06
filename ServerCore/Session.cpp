@@ -130,29 +130,17 @@ bool Session::Connect()
 
 void Session::Send(shared_ptr<SendBuffer> sendBuffer)
 {
-	//SendEvent* sendEvent = new SendEvent();
-	//sendEvent->owner = shared_from_this();
-	//sendEvent->buffer.resize(len);
-	//memcpy(sendEvent->buffer.data(), buffer, len);
 
-	//lock을 두번 잡아서
-	//lock_guard<mutex> guard(lock);
+	//lock을 잡고
+	{
+		lock_guard<mutex> guard(lock);
 
-	//senQueue에 추가
-	sendQueue.push(sendBuffer);
+		//senQueue에 추가
+		sendQueue.push(sendBuffer);
+	}//풀고
 
-	//if(sendRegistered == false)
-	//{
-	//	sendRegistered = true;
-	//	Todo)		   
-	//	RegisterSend();
-	//}
-
-	//만약에 현재 진행 중이라면 넣어주 그냥 넘기
-	//excange 옛날값 반환 ()갈호값 넣어줌
 	if (sendRegistered.exchange(true) == false)
 	{
-		//등록
 		RegisterSend();
 	}
 }
