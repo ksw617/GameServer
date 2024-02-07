@@ -23,6 +23,7 @@ int main()
 	if (listenSocket == INVALID_SOCKET)
 	{
 		printf("socket function failed with error %d\n", WSAGetLastError());
+		WSACleanup();
 		return 1;
 	}
 
