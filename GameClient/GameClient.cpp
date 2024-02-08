@@ -3,6 +3,7 @@
 using namespace std;
 
 #pragma comment(lib, "Ws2_32.lib")
+#include <WinSock2.h>
 #include <WS2tcpip.h>
 
 #include <Windows.h>
@@ -78,12 +79,12 @@ int main()
 
 		if (GetAsyncKeyState(VK_RETURN))
 		{
-			//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-			//SD_RECEIVE(0) : recv ï¿½ï¿½ï¿½Â´ï¿½. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-			//SD_SEND(1) : send ï¿½ï¿½ï¿½Â´ï¿½. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-			//SD_BOTH(2) : ï¿½Ñ´ï¿½ ï¿½ï¿½ï¿½Â´ï¿½. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ïµï¿½ ï¿½ï¿½ï¿½ï¿½. 
-			shutdown(connectSocket, SD_BOTH); // SD_SEND, SD_RECEIVE ï¿½Ñ´ï¿½ ï¿½ï¿½ï¿½ï¿½È°ï¿½
-			//whileï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+			//¿¬°á ²÷±â
+			//SD_RECEIVE(0) : recv ¸·´Â´Ù. ÀÌÁ¦ ¹ÞÀ»°Å ¾ø¾î
+			//SD_SEND(1) : send ¸·´Â´Ù. ÀÌÁ¦ º¸³¾°Å ¾ø¾î
+			//SD_BOTH(2) : µÑ´Ù ¸·´Â´Ù. ÀÌÁ¦ º¸³»ÀÏµµ ¹ÞÀ» ÀÏµµ ¾ø¾î. 
+			shutdown(connectSocket, SD_BOTH); // SD_SEND, SD_RECEIVE µÑ´Ù Àû¿ëµÈ°Å
+			//while¹® ³ª°¡±â
 			break;
 		}
 
@@ -91,7 +92,7 @@ int main()
 
 	}
 
-	closesocket(connectSocket);	//ï¿½ï¿½ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 
+	closesocket(connectSocket);	//¼öÇÏ±â ³»¸®´Â ÇàÀ§ 
 	WSACleanup();
 }
 
