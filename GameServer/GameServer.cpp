@@ -7,6 +7,9 @@ using namespace std;
 
 int main()
 {
+	printf("============= SERVER =============\n");
+
+
 	WORD wVersionRequested;
 	WSAData wsaData;
 	
@@ -55,26 +58,53 @@ int main()
 	{
 		printf("listening...\n");
 
+		SOCKADDR_IN clientService;
+		int	addrLen = sizeof(clientService);
+		memset(&clientService, 0, addrLen);
 
-		 SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
-		 //해당 소켓이 유효하지 않다면
+		SOCKET acceptSocket = accept(listenSocket, (SOCKADDR*)&clientService, &addrLen);
 		 if (acceptSocket == INVALID_SOCKET)
 		 {
-			 //에러 코드 확인
 			 printf("accept function failed with error %d\n", WSAGetLastError());
-			 //소켓 닫아주고
 			 closesocket(listenSocket);
-			 //Winsock 사용 종료
 			 WSACleanup();
-			 //프로그램 종료
 			 return 1;
 		 }
 
-		 //연결성공
 		 printf("Client connected.\n");
 
-	}
+		 char ipAddress[16];
+		 inet_ntop(AF_INET, &clientService.sin_addr, ipAddress, sizeof(ipAddress));
+		 printf("Client connected IP : %s\n", ipAddress);
 
+		 while (true)
+		 {
+			 char sendBuffer[] = "Hello this is server!";
+
+			 if (send(acceptSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
+			 {
+				 printf("Send Error %d\n", WSAGetLastError());
+				 closesocket(acceptSocket);
+				 break;
+			 }
+
+			 printf("Send Data : %s\n", sendBuffer);
+
+			 char recvBuffer[512];
+			 int recvLen = recv(acceptSocket, recvBuffer, sizeof(recvBuffer), 0);
+
+			 if (recvLen <= 0)
+			 {
+				 printf("Recv Error : %d\n", WSAGetLastError());
+				 closesocket(acceptSocket);
+				 break;
+
+			 }
+
+			 printf("Recv Buffer Data[%s] : %s\n", ipAddress, recvBuffer);
+			 printf("Recv Buffer Length : %d bytes\n", recvLen);
+		 }
+	}
 
 	closesocket(listenSocket);
 	WSACleanup();
