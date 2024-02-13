@@ -11,6 +11,8 @@ using namespace std;
 
 int main()
 {
+	Sleep(1000);
+
 	printf("============= CLIENT =============\n");
 
 	WORD wVersionRequested;
@@ -23,6 +25,7 @@ int main()
 		return 1;
 	}
 
+	//UDP
 	SOCKET connectSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (connectSocket == INVALID_SOCKET)
 	{
@@ -40,59 +43,34 @@ int main()
 
 	if (connect(connectSocket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
 	{
-		printf("connect function failed with error : %d\n", WSAGetLastError());
+		printf("connect failed with error %d\n", WSAGetLastError());
 		closesocket(connectSocket);
 		WSACleanup();
 		return 1;
+
 	}
 
-	printf("Connect to Server.\n");
+	printf("Connected\n");
 
 	while (true)
 	{
-		char recvBuffer[512];
 
-		int recvLen = recv(connectSocket, recvBuffer, sizeof(recvBuffer), 0);
-		if (recvLen <= 0)
-		{
-			printf("Recv Error : %d\n", WSAGetLastError());
-			closesocket(connectSocket);
-			WSACleanup();
-			return 1;
-		}
-
-		printf("Recv Buffer Data : %s\n", recvBuffer);
-		printf("Recv buffer Length : %d bytes\n", recvLen);
-
-		char sendBuffer[] = "Hello this is client!";
-
+		char sendBuffer[] = "Hello This is Client";
 		if (send(connectSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
 		{
 			printf("Send Error %d\n", WSAGetLastError());
 			closesocket(connectSocket);
 			WSACleanup();
-
 			return 1;
+
 		}
 
 		printf("Send Buffer : %d bytes\n", sizeof(sendBuffer));
-
-		if (GetAsyncKeyState(VK_RETURN))
-		{
-			//연결 끊기
-			//SD_RECEIVE(0) : recv 막는다. 이제 받을거 없어
-			//SD_SEND(1) : send 막는다. 이제 보낼거 없어
-			//SD_BOTH(2) : 둘다 막는다. 이제 보내일도 받을 일도 없어. 
-			shutdown(connectSocket, SD_BOTH); // SD_SEND, SD_RECEIVE 둘다 적용된거
-			//while문 나가기
-			break;
-		}
-
 		Sleep(1000);
 
 	}
 
-	closesocket(connectSocket);	//수하기 내리는 행위 
+	closesocket(connectSocket);
 	WSACleanup();
 }
 

@@ -9,7 +9,6 @@ int main()
 {
 	printf("============= SERVER =============\n");
 
-
 	WORD wVersionRequested;
 	WSAData wsaData;
 	
@@ -21,6 +20,7 @@ int main()
 		return 1;
 	}
 
+	//TCP
 	SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, 0);
 							  
 	if (listenSocket == INVALID_SOCKET)
@@ -29,81 +29,86 @@ int main()
 		WSACleanup();
 		return 1;
 	}
+	
+	u_long iMode = 1;
+	if (ioctlsocket(listenSocket, FIONBIO, &iMode) == INVALID_SOCKET)
+	{
+		printf("ioctlsocket failed with error : %d\n", WSAGetLastError());
+		closesocket(listenSocket);
+		WSAGetLastError();
+		return 1;
+	}
 
 	SOCKADDR_IN service;
 	memset(&service, 0, sizeof(service));
 	service.sin_family = AF_INET;
-	inet_pton(AF_INET, "127.0.0.1", &service.sin_addr);
+	service.sin_addr.s_addr = htonl(INADDR_ANY);
 	service.sin_port = htons(27015);
 
-	if (bind(listenSocket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
+	if (bind(listenSocket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR) 
 	{
-		printf("bind failed with error %d", WSAGetLastError());
+		printf("bind failed with error %d\n", WSAGetLastError());
 		closesocket(listenSocket);
 		WSACleanup();
 		return 1;
 
 	}
 
-
 	if (listen(listenSocket, 10) == SOCKET_ERROR)
 	{
-		printf("listen failed with error %d", WSAGetLastError());
+		printf("listen failed with error %d\n", WSAGetLastError());
 		closesocket(listenSocket);
-		WSACleanup();
+		WSAGetLastError();
 		return 1;
 	}
 
 	while (true)
 	{
-		printf("listening...\n");
+		SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
+		if (acceptSocket == INVALID_SOCKET)
+		{
+			//아직 받지 않음
+			if (WSAGetLastError() == WSAEWOULDBLOCK)
+			{
+				continue;
+			}
 
-		SOCKADDR_IN clientService;
-		int	addrLen = sizeof(clientService);
-		memset(&clientService, 0, addrLen);
+			//진짜 에러
+			break;
 
-		SOCKET acceptSocket = accept(listenSocket, (SOCKADDR*)&clientService, &addrLen);
-		 if (acceptSocket == INVALID_SOCKET)
-		 {
-			 printf("accept function failed with error %d\n", WSAGetLastError());
-			 closesocket(listenSocket);
-			 WSACleanup();
-			 return 1;
-		 }
+		}
 
-		 printf("Client connected.\n");
+		printf("CLient Connected\n");
 
-		 char ipAddress[16];
-		 inet_ntop(AF_INET, &clientService.sin_addr, ipAddress, sizeof(ipAddress));
-		 printf("Client connected IP : %s\n", ipAddress);
+		while (true)
+		{
+			char recvBuffer[512];
+			int recvLen = recv(acceptSocket, recvBuffer, sizeof(recvBuffer), 0);
+			 //소켓 에러일 경우
+			if (recvLen == SOCKET_ERROR)
+			{
+				//클라에서 보내질 않은거지 문제는 없음
+				if (WSAGetLastError() == WSAEWOULDBLOCK)
+				{
+					//Recv -> while 
+					//보냈는지 계속 체크
+					continue;
 
-		 while (true)
-		 {
-			 char sendBuffer[] = "Hello this is server!";
+				}
 
-			 if (send(acceptSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
-			 {
-				 printf("Send Error %d\n", WSAGetLastError());
-				 closesocket(acceptSocket);
-				 break;
-			 }
+				//진짜 에러
+				break;
 
-			 printf("Send Data : %s\n", sendBuffer);
+			}
+			else if (recvLen == 0) //보내데이터가 0byte
+			{
+				//연결 끊음
+				break;
+			}
 
-			 char recvBuffer[512];
-			 int recvLen = recv(acceptSocket, recvBuffer, sizeof(recvBuffer), 0);
-
-			 if (recvLen <= 0)
-			 {
-				 printf("Recv Error : %d\n", WSAGetLastError());
-				 closesocket(acceptSocket);
-				 break;
-
-			 }
-
-			 printf("Recv Buffer Data[%s] : %s\n", ipAddress, recvBuffer);
-			 printf("Recv Buffer Length : %d bytes\n", recvLen);
-		 }
+			//받은 데이터 확인
+			printf("Recv Data : %s\n", recvBuffer);
+		}
 	}
 
 	closesocket(listenSocket);
