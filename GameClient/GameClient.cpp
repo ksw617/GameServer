@@ -54,7 +54,7 @@ int main()
 
 	while (true)
 	{
-
+	
 		char sendBuffer[] = "Hello This is Client";
 		if (send(connectSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
 		{
@@ -62,12 +62,12 @@ int main()
 			closesocket(connectSocket);
 			WSACleanup();
 			return 1;
-
+	
 		}
-
+	
 		printf("Send Buffer : %d bytes\n", sizeof(sendBuffer));
 		Sleep(1000);
-
+	
 	}
 
 	closesocket(connectSocket);

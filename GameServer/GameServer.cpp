@@ -5,6 +5,8 @@ using namespace std;
 #include <WinSock2.h>	
 #include <WS2tcpip.h> 
 
+#include <vector>
+
 int main()
 {
 	printf("============= SERVER =============\n");
@@ -20,7 +22,7 @@ int main()
 		return 1;
 	}
 
-	//TCP
+	//IPv4 & TCP
 	SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, 0);
 							  
 	if (listenSocket == INVALID_SOCKET)
@@ -62,53 +64,82 @@ int main()
 		return 1;
 	}
 
+	printf("listening...\n");
+
+	//접속한 소켓을 담을 구조체
+	vector<SOCKET> sockets;
+
+	fd_set reads;	//읽기 전용
+	fd_set writes;  //쓰기 전용
+
+	//Socket sock;
+	//fd_set set;
+	//FD_ZERO : 빈 집합을 초기화. ex) FD_ZERO(&set);
+	//FD_CLR  : 집합에서 소켓을 제거. ex) FD_CLR(sock, &set); // 해당 소켓을 해당 집합에서 제거
+	//FD_ISSET: 해당 소켓이 집합의 맴버인지 확인, set에 들어가 있으면 TRUE를 반환, ex) FD_ISSET(sock, &set);
+	//FD_SET  : 소켓을 추가. ex) FD_SET(sock, &set); //해당 set에 sock 추가
+
 	while (true)
 	{
-		SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
-		if (acceptSocket == INVALID_SOCKET)
+
+		FD_ZERO(&reads);
+
+		//이미 접속해서 통신할수 있는 애들 하나씩 순회
+		for (SOCKET& sock : sockets)
 		{
-			//아직 받지 않음
-			if (WSAGetLastError() == WSAEWOULDBLOCK)
-			{
-				continue;
-			}
-
-			//진짜 에러
-			break;
-
+			//reads에 등록
+			FD_SET(sock, &reads);
 		}
 
-		printf("CLient Connected\n");
+		FD_SET(listenSocket, &reads);
 
-		while (true)
+		printf("Before\n");
+
+		//등록된 애들중에 send를 했거나, 새로운 클라가 접속(connect)을 했거나
+		if(select(0, &reads, nullptr, nullptr, nullptr) == SOCKET_ERROR)
 		{
-			char recvBuffer[512];
-			int recvLen = recv(acceptSocket, recvBuffer, sizeof(recvBuffer), 0);
-			 //소켓 에러일 경우
-			if (recvLen == SOCKET_ERROR)
-			{
-				//클라에서 보내질 않은거지 문제는 없음
-				if (WSAGetLastError() == WSAEWOULDBLOCK)
-				{
-					//Recv -> while 
-					//보냈는지 계속 체크
-					continue;
+			printf("select failed with error : %d\n", WSAGetLastError());
+			closesocket(listenSocket);
+			WSACleanup();
+			return 1;
+		}
 
+
+		if (FD_ISSET(listenSocket, &reads))
+		{
+			SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
+			//sockets에다가 접속된 client와 통신할 수 있는 acceptsSocket을 추가
+			sockets.push_back(acceptSocket);
+			printf("Client Connected...\n");
+		}
+
+		//이미 접속해서 통신할수 있는 애들 하나씩 순회
+		for (SOCKET& sock : sockets)
+		{
+			//해당 소켓이 무언가 보냈다면 reads에 등록 되어 있을꺼고
+			//FD_ISSET은 해당 소켓이 등록되어 있는지 없는지만 체크
+			if (FD_ISSET(sock, &reads))
+			{
+				char recvBuffer[512];
+
+				//Non blocking recv <- 여기 까지 왔다는건 select 넘어와서 reads에 등록되어 있으니
+				//준비가 되어 있는 상태
+				int recvLen = recv(sock, recvBuffer, sizeof(recvBuffer), 0);
+
+				//보냈긴 했는데 값이 없으면
+				if (recvLen <= 0)
+				{
+					//해당 소켓을 날림
+					sockets.erase(remove(sockets.begin(), sockets.end(), sock), sockets.end());
+					continue;
 				}
 
-				//진짜 에러
-				break;
-
-			}
-			else if (recvLen == 0) //보내데이터가 0byte
-			{
-				//연결 끊음
-				break;
+				//받은 데이터 체크
+				printf("Recv Data : %s\n", recvBuffer);
 			}
 
-			//받은 데이터 확인
-			printf("Recv Data : %s\n", recvBuffer);
 		}
+
 	}
 
 	closesocket(listenSocket);
