@@ -25,7 +25,7 @@ int main()
 		return 1;
 	}
 
-	//UDP
+	//IPV4 & TCP
 	SOCKET connectSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (connectSocket == INVALID_SOCKET)
 	{
@@ -55,7 +55,8 @@ int main()
 	while (true)
 	{
 	
-		char sendBuffer[] = "Hello This is Client";
+
+		char sendBuffer[512] = "Hello This is Client!";
 		if (send(connectSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
 		{
 			printf("Send Error %d\n", WSAGetLastError());
@@ -66,6 +67,25 @@ int main()
 		}
 	
 		printf("Send Buffer : %d bytes\n", sizeof(sendBuffer));
+
+
+
+		//char recvBuffer[512];
+		//
+		//int recvLen = recv(connectSocket, recvBuffer, sizeof(recvBuffer), 0);
+		//if (recvLen <= 0)
+		//{
+		//	printf("Recv Error : %d\n", WSAGetLastError());
+		//	closesocket(connectSocket);
+		//	WSACleanup();
+		//	return 1;
+		//}
+		//
+		//printf("Recv Buffer Data : %s\n", recvBuffer);
+		//printf("Recv buffer Length : %d bytes\n", recvLen);
+
+
+
 		Sleep(1000);
 	
 	}
