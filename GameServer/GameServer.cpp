@@ -76,103 +76,111 @@ int main()
 
 	printf("listening...\n");
 
-	//Session을 담을 vector
-	vector<Session> sessions;
+	vector<SOCKET> sockets;
+	vector<WSAEVENT> wsaEvents;
+	sockets.push_back(listenSocket);
 
-	fd_set reads;	//읽기 전용
-	fd_set writes;  //쓰기 전용
+	WSAEVENT listenEvent = WSACreateEvent();
+	wsaEvents.push_back(listenEvent);
 
+
+	if (WSAEventSelect(listenSocket, listenEvent, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR)
+	{
+		printf("WSAEventSelect failed with error %d\n", WSAGetLastError());
+		closesocket(listenSocket);
+		WSACleanup();
+		return 1;
+	};
 
 	while (true)
 	{
-		//초기화
-		FD_ZERO(&reads);
-		FD_ZERO(&writes);
-
-		//담은 session들 순회
-		for (Session& session : sessions)
-		{
-			//크기 비교해서
-			//0					  0
-			if (session.recvLen <= session.sendLen)
-			{
-				//읽고
-				FD_SET(session.sock, &reads);
-			}
-			else
-			{	
-				//쓰고
-				FD_SET(session.sock, &writes);
-			}
+		DWORD index = WSAWaitForMultipleEvents(wsaEvents.size(), &wsaEvents[0], FALSE, WSA_INFINITE, FALSE);
 		
+		if (index == WSA_WAIT_FAILED)
+		{
+			continue;
 		}
 
-		FD_SET(listenSocket, &reads);
+		index -= WSA_WAIT_EVENT_0;
 
-		//writes도 체크
-		if(select(0, &reads, &writes, nullptr, nullptr) == SOCKET_ERROR)
+		WSANETWORKEVENTS networkEvents;
+
+		if (WSAEnumNetworkEvents(sockets[index], wsaEvents[index], &networkEvents) == SOCKET_ERROR)
 		{
-			printf("select failed with error : %d\n", WSAGetLastError());
-			closesocket(listenSocket);
-			WSACleanup();
-			return 1;
+			continue;
 		}
 
-
-		if (FD_ISSET(listenSocket, &reads))
+#pragma region Accept
+		if (networkEvents.lNetworkEvents & FD_ACCEPT)
 		{
+
+			if (networkEvents.iErrorCode[FD_ACCEPT_BIT] != 0)
+			{
+				continue;
+			}
+
 			SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
-			//Session 하나 만들고
-			Session session;
-			//해당 구조체 SOCKET 에다가 접속한 소켓을 넣어주고
-			session.sock = acceptSocket;
-			//sessions에 밀어 넣음
-			sessions.push_back(session);
-			printf("Client Connected...\n");
-		}
+			if (acceptSocket != INVALID_SOCKET)
+			{
+				printf("Client Connected...\n");
 
-		for (Session& session : sessions)
+				sockets.push_back(acceptSocket);
+
+				WSAEVENT acceptEvent = WSACreateEvent();
+
+				wsaEvents.push_back(acceptEvent);
+
+				if (WSAEventSelect(acceptSocket, acceptEvent, FD_READ | FD_WRITE | FD_CLOSE) == SOCKET_ERROR)
+				{
+					printf("WSAEventSelect failed with error %d\n", WSAGetLastError());
+					closesocket(acceptSocket);
+					closesocket(listenSocket);
+					WSACleanup();
+					return 1;
+				}
+			}
+		}
+#pragma endregion
+
+#pragma region READ
+
+		//acceptsocket들을 체크
+		//해당 소켓이 FD_READ 할 준비가 끝났다면
+		if (networkEvents.lNetworkEvents & FD_READ)
 		{
-			if (FD_ISSET(session.sock, &reads))
+			//에러 발생시
+			if (networkEvents.iErrorCode[FD_READ_BIT] != 0)
 			{
-
-				int recvLen = recv(session.sock, session.recvBuffer, sizeof(session.recvBuffer), 0);
-
-				if (recvLen <= 0)
-				{
-					continue;
-				}
-
-				session.recvLen = recvLen;
-				printf("Recv Data : %s\n", session.recvBuffer);
+				//다시 루프
+				continue;
 			}
+		}
 
-			//writes에 해당 socket이 있다면
-			if (FD_ISSET(session.sock, &writes))
+		//이벤트가 발생한 해당소켓을 참조
+		SOCKET& sock = sockets[index];
+
+		//데이터 받을 버퍼
+		char recvBuffer[512] = {};
+		//준비가 되어 있으니 바로 받음 됨
+		int recvLen = recv(sock, recvBuffer, sizeof(recvBuffer), 0);
+		//에러 발생시
+		if (recvLen == SOCKET_ERROR)
+		{
+			//WSAEWOULDBLOCK 상태가 아니면 문제가 있는거니까
+			if (WSAGetLastError() != WSAEWOULDBLOCK)
 			{
-
-				//받은거 바로 보내기
-				int sendLen = send(session.sock, session.recvBuffer, sizeof(session.recvBuffer), 0);
-
-
-				//이미 준비되어 있으니까 보내버림
-				if (sendLen == SOCKET_ERROR)
-				{
-					continue;
-				}
-
-				session.sendLen = sendLen;
-				if (session.recvLen == session.sendLen)
-				{
-					session.recvLen = 0;
-					session.sendLen = 0;
-				}
-
-				//얼마나 보냈는지 확인
-				printf("Send Buffer Length : %d byte \n", sendLen);
+				//다시 루프
+				continue;
 			}
 
 		}
+
+		//받은 데이터 확인
+		printf("Recv Data : %s\n", recvBuffer);
+		
+
+#pragma endregion
+
 
 	}
 
