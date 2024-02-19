@@ -52,43 +52,30 @@ int main()
 
 	printf("Connected\n");
 
-	while (true)
-	{
-	
 
-		char sendBuffer[512] = "Hello This is Client!";
+	while (true)
+	{		
+		
+		//보낼 버퍼 값 넣어주고
+		char sendBuffer[] = "Hello this is Client!";
+
+		//이미 준비되어 있으니까 보내버림
 		if (send(connectSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
 		{
-			printf("Send Error %d\n", WSAGetLastError());
+			//연결 닫음.
 			closesocket(connectSocket);
 			WSACleanup();
 			return 1;
-	
+
 		}
-	
-		printf("Send Buffer : %d bytes\n", sizeof(sendBuffer));
 
-
-
-		//char recvBuffer[512];
-		//
-		//int recvLen = recv(connectSocket, recvBuffer, sizeof(recvBuffer), 0);
-		//if (recvLen <= 0)
-		//{
-		//	printf("Recv Error : %d\n", WSAGetLastError());
-		//	closesocket(connectSocket);
-		//	WSACleanup();
-		//	return 1;
-		//}
-		//
-		//printf("Recv Buffer Data : %s\n", recvBuffer);
-		//printf("Recv buffer Length : %d bytes\n", recvLen);
-
+		//얼마나 보냈는지 확인
+		printf("Send Buffer Length : %d byte \n", sizeof(sendBuffer));
 
 
 		Sleep(1000);
-	
 	}
+
 
 	closesocket(connectSocket);
 	WSACleanup();
