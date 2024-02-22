@@ -6,7 +6,52 @@ using namespace std;
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 
-#include <Windows.h>
+#include <thread>
+
+struct Session 
+{
+	WSAOVERLAPPED overlapped = {};		// 비동기 I/O 작업을 위한 구조체
+	SOCKET socket = INVALID_SOCKET;		// 클라이언트와의 통신을 담당하는 소켓
+	char sendBuffer[512] = {};			// 데이터 수신을 위한 버퍼
+};
+
+void SendThread(HANDLE iocpHandle)
+{
+	DWORD bytesTransferred = 0;
+	ULONG_PTR key = 0;
+	Session* session = nullptr;
+
+	while (true)
+	{
+		printf("Waiting...\n");
+		if (GetQueuedCompletionStatus(iocpHandle, &bytesTransferred, &key, (LPOVERLAPPED*)&session, INFINITE))
+		{
+			WSABUF wsaBuf;
+			wsaBuf.buf = session->sendBuffer;		// 수신 버퍼 지정
+			wsaBuf.len = size(session->sendBuffer);	// 버퍼의 크기 지정
+
+			DWORD sendLen = 0;	//수신된 데이터 길이를 저장할 변수
+			DWORD flags = 0;	//flag, 현재 사용하지 않음
+
+			printf("session->sendBuffer : %s\n", session->sendBuffer);
+
+			//비동기로 보냄
+			if (WSASend(session->socket, &wsaBuf, 1, &sendLen, flags, &session->overlapped, NULL) == SOCKET_ERROR)
+			{
+				//연결 실패 시 오류 메세지 출력
+				printf("send failed with error %d", WSAGetLastError());
+				return;
+
+			}
+
+			printf("Send...\n");
+
+		}
+		
+		//1초 대기
+		this_thread::sleep_for(1s);
+	}
+}
 
 
 int main()
@@ -46,7 +91,6 @@ int main()
 	if (connect(connectSocket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
 	{
 
-		//연결 실패 시 오류 메세지 출력
 		printf("connect failed with error %d\n", WSAGetLastError());
 		closesocket(connectSocket);
 		WSACleanup();
@@ -58,33 +102,34 @@ int main()
 	//연결 성공
 	printf("Connected\n");
 
-	//보낼 버퍼 할당. 값 초기화
-	char sendBuffer[] = "Hello this is client!";
+	
+	HANDLE iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, NULL);
+	thread t(SendThread, iocpHandle);
 
-	while (true)
-	{
-		//데이터 보내기
-	//만약에 소켓 에러라면
-		if (send(connectSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
-		{
-			//에러 코드 확인
-			printf("Send Error %d\n", WSAGetLastError());
+	ULONG_PTR key = 0;
+	//connectSocket을 iocpHandle이랑 연결
+	CreateIoCompletionPort((HANDLE)connectSocket, iocpHandle, key, 0);
 
-			//소켓 닫고
-			closesocket(connectSocket);
+	Session* session = new Session;
+	session->socket = connectSocket;
+	char sendBuffer[512] = "Hello this is client";	//전송할 메세지 설정
 
-			//클린업 하고
-			WSACleanup();
+	//session->sendBuffer에 보내고 싶은 자료 복사
+	//memcpy(담을곳, 복사할 시작주소, 복사할 크기);
+	memcpy(session->sendBuffer, sendBuffer, sizeof(sendBuffer));
 
-			//프로그램 종료
-			return 1;
-		}
+	WSABUF wsaBuf;
+	wsaBuf.buf = session->sendBuffer;
+	wsaBuf.len = sizeof(session->sendBuffer);
 
-		//얼마나 보냈는지 체크
-		printf("Send Buffer : %d bytes\n", sizeof(sendBuffer));
+	DWORD sendLen = 0;
+	DWORD flags = 0;
 
-		Sleep(1000);
-	}
+	//WSASend 호출
+	WSASend(connectSocket, &wsaBuf, 1, &sendLen, flags, &session->overlapped, NULL);
+
+
+	t.join();
 
 
 	closesocket(connectSocket);

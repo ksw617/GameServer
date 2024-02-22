@@ -6,43 +6,22 @@ using namespace std;
 #include <WS2tcpip.h> 
 
 #include <thread> 
+#include <MSWSock.h> // 추가
 
-struct Session
+//비동기 I/O 작업을 처리하는 스레드 함수
+void AcceptThread(HANDLE iocpHandle)
 {
-	WSAOVERLAPPED overlapped = {};	//비동기 I/O 작업을 위한 구조체
-	SOCKET socket = INVALID_SOCKET; // 클라이언트와의 통신을 담당하는 소켓
-	char recvBuffer[512] = {};		// 데이터 수신을 위한 버퍼
-
-};
-
-
-
-void RecvThread(HANDLE iocpHandle)
-{
-	DWORD byteTransferred = 0;
+	DWORD bytesTransferred = 0;
 	ULONG_PTR key = 0;
-	Session* session = nullptr;
+	WSAOVERLAPPED* overlapped = {};
 
 	while (true)
 	{
-		printf("Waiting....\n");
-
-		if (GetQueuedCompletionStatus(iocpHandle, &byteTransferred, &key, (LPOVERLAPPED*)&session, INFINITE))
+		printf("Waiting...\n");
+		if (GetQueuedCompletionStatus(iocpHandle, &bytesTransferred, &key, (LPOVERLAPPED*)&overlapped, INFINITE))
 		{
-			printf("recv Data : %s\n", session->recvBuffer);
-
-			//수신 버퍼 및 기타 정보를 설정하여 다시 데이터 수신 준비
-			WSABUF wsaBuf;
-			wsaBuf.buf = session->recvBuffer;			//수신 버퍼 지정
-			wsaBuf.len = sizeof(session->recvBuffer);	//버퍼의 크기 지정
-
-			DWORD recvLen = 0;		//수신된 데이터 길이를 저장할 변수
-			DWORD flags = 0;		//flags 현재 안사용함
-
-			//비동기 수신을 다시 시작. 지속적인 데이터 수신을 위해 반복
-			WSARecv(session->socket, OUT & wsaBuf, 1, OUT & recvLen, OUT & flags, &session->overlapped, NULL);
+			printf("Client Connected...\n");
 		}
-
 	}
 }
 
@@ -96,40 +75,61 @@ int main()
 
 	printf("listening...\n");
 
-	HANDLE iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, NULL);
-	thread t(RecvThread, iocpHandle);
+	//AcceptEX 함수포인터 로드
+	DWORD dwBytes;
+	LPFN_ACCEPTEX lpfnAcceptEx = NULL;
+	GUID GuidAcceptEx = WSAID_ACCEPTEX;
 
-	while (true)
+	if (WSAIoctl(listenSocket, SIO_GET_EXTENSION_FUNCTION_POINTER, &GuidAcceptEx, sizeof(GuidAcceptEx),
+		&lpfnAcceptEx, sizeof(lpfnAcceptEx), &dwBytes, NULL, NULL) == SOCKET_ERROR)
 	{
-		SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
-		if (acceptSocket == INVALID_SOCKET)
+		printf("WSAIcottl failed with error : %d\n", WSAGetLastError());
+		closesocket(listenSocket);
+		WSACleanup();
+		return 1;
+	}
+
+	//클라이언트 연결 수락할 소켓을 생성
+	SOCKET acceptSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (acceptSocket == INVALID_SOCKET)
+	{								   
+		printf("Accept Socket failed with error : %d\n", WSAGetLastError());
+		closesocket(listenSocket);
+		WSACleanup();
+		return 1;
+
+	}
+
+	//IOCP를 생성
+	HANDLE iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, NULL);
+	//비동기 I/O 작업 처리를 위한 스레드 시작
+	thread t(AcceptThread, iocpHandle);
+
+	//listenSocket을 IOCP에 연결
+	ULONG_PTR key = 0;
+	CreateIoCompletionPort((HANDLE)listenSocket, iocpHandle, key, 0);
+
+	char lpOutputBuf[1024];
+	//WSAOVERLAPPED overlapped;
+	//memset(&overlapped, 0, sizeof(overlapped));
+	WSAOVERLAPPED overlapped = {};
+
+	//AcceptEX를 호출하여 비동기적으로 클라이언트 연결 수락
+	if (!lpfnAcceptEx(listenSocket, acceptSocket, lpOutputBuf, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &dwBytes, &overlapped))
+	{
+		//에러 코드가 PENDING이 아니라면
+		if (WSAGetLastError() != ERROR_IO_PENDING)
 		{
-			closesocket(listenSocket); 
+			printf("AcceptEx failed with error : %d\n", WSAGetLastError());
+			closesocket(acceptSocket);
+			closesocket(listenSocket);
 			WSACleanup();
 			return 1;
 
 		}
-
-		printf("Client Connected\n");
-		
-		ULONG_PTR key = 0;
-		CreateIoCompletionPort((HANDLE)acceptSocket, iocpHandle, key, 0);
-
-
-		Session* session = new Session;
-		session->socket = acceptSocket;
-
-		WSABUF wsaBuf;
-		wsaBuf.buf = session->recvBuffer;
-		wsaBuf.len = sizeof(session->recvBuffer);
-
-		DWORD recvLen = 0;
-		DWORD flags = 0;
-
-		WSARecv(acceptSocket, OUT & wsaBuf, 1, OUT & recvLen, OUT & flags, &session->overlapped, NULL);
-
 	}
 
+	//스레드 종료될때까지 기다리기
 	t.join();
 
 	closesocket(listenSocket);
