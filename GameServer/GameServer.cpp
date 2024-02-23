@@ -90,7 +90,7 @@ int main()
 	}
 
 	//클라이언트 연결 수락할 소켓을 생성
-	SOCKET acceptSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	SOCKET acceptSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 	if (acceptSocket == INVALID_SOCKET)
 	{								   
 		printf("Accept Socket failed with error : %d\n", WSAGetLastError());
