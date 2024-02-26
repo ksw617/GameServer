@@ -50,6 +50,8 @@ int main()
 		return 1;
 	}
 
+
+
 	SOCKADDR_IN service;
 	memset(&service, 0, sizeof(service));
 	service.sin_family = AF_INET;
@@ -99,6 +101,7 @@ int main()
 		return 1;
 
 	}
+
 
 	//IOCP¸¦ »ý¼º
 	HANDLE iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, NULL);
