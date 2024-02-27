@@ -8,3 +8,5 @@
 #pragma commet(lib, "Release\\ServerCore.lib")
 #endif 
 
+#include <CorePch.h>
+

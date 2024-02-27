@@ -4,6 +4,9 @@
     <Filter Include="pch">
       <UniqueIdentifier>{2ccb4998-f986-476c-8c42-da501b15ffb6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network">
+      <UniqueIdentifier>{2c79824f-dd83-4709-8538-1449c224dd2a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -12,6 +15,7 @@
     <ClInclude Include="CorePch.h">
       <Filter>pch</Filter>
     </ClInclude>
+    <ClInclude Include="Service.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -20,5 +24,6 @@
     <ClCompile Include="CorePch.cpp">
       <Filter>pch</Filter>
     </ClCompile>
+    <ClCompile Include="Service.cpp" />
   </ItemGroup>
 </Project>
