@@ -1,19 +1,29 @@
 #include <iostream>
-#include <thread>  // 스레드 사용할려면
+#include <thread>  
 using namespace std;
 
 #pragma comment(lib, "Ws2_32.lib")
 #include <WinSock2.h>	
 #include <WS2tcpip.h> 
 
-//또다른 스레드 만들어서 이 함수 돌리려고
-void RecvThread()
+void RecvThread(HANDLE iocpHandle)
 {
+    DWORD byteTransferred = 0;
+    ULONG_PTR key = 0;
+    WSAOVERLAPPED overlapped = {};
+
     while (true)
     {
-       // printf("Hello\n");
+        printf("Waiting....\n");
 
-        this_thread::sleep_for(100ms);
+
+        GetQueuedCompletionStatus(iocpHandle, &byteTransferred, &key, (LPOVERLAPPED*)&overlapped, INFINITE);
+
+        printf("recv Length : %d\n", byteTransferred); 
+        printf("recv key : %p\n", key);        
+
+        //걸어줘야 하는데 acceptSocket을 넣어줄수 없어 <- Send한 client랑 소통할 소켓
+        //WSARecv(acceptSocket, OUT & wsaBuf, 1, OUT & recvLen, &flags, &overlapped, NULL);
     }
 }
 
@@ -55,7 +65,6 @@ int main()
         WSACleanup();
         return 1;
 
-
     }
 
     if (listen(listenSocket, 10) == SOCKET_ERROR)
@@ -68,9 +77,13 @@ int main()
 
     printf("listening...\n");
 
-    //스레드 만들어서 해당 함수 돌려줌
-    thread t(RecvThread);
+    HANDLE iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, NULL);
      
+    thread t(RecvThread, iocpHandle);
+
+    //수신 데이터 버퍼
+    //= {}; 0으로 초기화
+    char recvBuffer[512] = {};
 
     while (true)
     {
@@ -85,10 +98,24 @@ int main()
             return 1;
         }
 
+        printf("Client Connected\n");
+        ULONG_PTR key = 0;
+        CreateIoCompletionPort((HANDLE)acceptSocket, iocpHandle, key, 0);
+
+
+        WSABUF wsaBuf;
+        wsaBuf.buf = recvBuffer; 
+        wsaBuf.len = sizeof(recvBuffer);
+
+        DWORD recvLen = 0;
+        DWORD flags = 0;
+        WSAOVERLAPPED overlapped = {};
+
+        WSARecv(acceptSocket, OUT &wsaBuf, 1, OUT &recvLen, &flags,  &overlapped, NULL);
+
     }
   
 
-    //스레드 일 다 처리 할때까지 기다림
     t.join();
 
     closesocket(listenSocket);
