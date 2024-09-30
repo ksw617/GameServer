@@ -6,24 +6,46 @@ using namespace std;
 #include <WinSock2.h>	
 #include <WS2tcpip.h> 
 
+
+struct Session
+{
+    WSAOVERLAPPED overlapped = {};
+    //소켓
+    SOCKET socket = INVALID_SOCKET;
+    //받을 공간
+    char recvBuffer[512] = {};
+};
+
 void RecvThread(HANDLE iocpHandle)
 {
     DWORD byteTransferred = 0;
     ULONG_PTR key = 0;
-    WSAOVERLAPPED overlapped = {};
+    //WSAOVERLAPPED overlapped = {};
+    Session* session = nullptr;
+
 
     while (true)
     {
         printf("Waiting....\n");
 
 
-        GetQueuedCompletionStatus(iocpHandle, &byteTransferred, &key, (LPOVERLAPPED*)&overlapped, INFINITE);
+        GetQueuedCompletionStatus(iocpHandle, &byteTransferred, &key, (LPOVERLAPPED*)&session, INFINITE);
 
-        printf("recv Length : %d\n", byteTransferred); 
-        printf("recv key : %p\n", key);        
+        printf("Recv : %s\n", session->recvBuffer);
 
-        //걸어줘야 하는데 acceptSocket을 넣어줄수 없어 <- Send한 client랑 소통할 소켓
-        //WSARecv(acceptSocket, OUT & wsaBuf, 1, OUT & recvLen, &flags, &overlapped, NULL);
+        //printf("recv Length : %d\n", byteTransferred); 
+        //printf("recv key : %p\n", key);        
+
+        //수신 버퍼 및 기타 정보를 설정하여 다시 데이터 수신 준비
+        WSABUF wsaBuf;
+        wsaBuf.buf = session->recvBuffer;                    //수신버퍼 지정
+        wsaBuf.len = sizeof(session->recvBuffer);            //버퍼의 크기 지정
+
+        DWORD recvLen = 0;                                   //수신된 데이터 길이를 저장할 변수
+        DWORD flags = 0;                                     //flags 현재 사용하지 않음
+       
+        //비동기 수신을 다시 시작. 지속적으로 데이터 수신을 위해 반복
+        WSARecv(session->socket, OUT & wsaBuf, 1, OUT & recvLen, &flags, &session->overlapped, NULL);
     }
 }
 
@@ -66,7 +88,7 @@ int main()
         return 1;
 
     }
-
+          
     if (listen(listenSocket, 10) == SOCKET_ERROR)
     {
         printf("listen failed with error : %d\n", WSAGetLastError());
@@ -81,15 +103,10 @@ int main()
      
     thread t(RecvThread, iocpHandle);
 
-    //수신 데이터 버퍼
-    //= {}; 0으로 초기화
-    char recvBuffer[512] = {};
-
     while (true)
     {
- 
         SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
-        printf("Hello\n");
+
         if (acceptSocket == INVALID_SOCKET)
         {
             printf("accept failed with error : %d\n", WSAGetLastError());
@@ -102,16 +119,20 @@ int main()
         ULONG_PTR key = 0;
         CreateIoCompletionPort((HANDLE)acceptSocket, iocpHandle, key, 0);
 
+        Session* session = new Session;
+        //소켓 등록
+        session->socket = acceptSocket;
 
         WSABUF wsaBuf;
-        wsaBuf.buf = recvBuffer; 
-        wsaBuf.len = sizeof(recvBuffer);
+        //buffer -> session->recvBuffer
+        wsaBuf.buf = session->recvBuffer; 
+        wsaBuf.len = sizeof(session->recvBuffer);
 
         DWORD recvLen = 0;
         DWORD flags = 0;
-        WSAOVERLAPPED overlapped = {};
+        //WSAOVERLAPPED overlapped = {};
 
-        WSARecv(acceptSocket, OUT &wsaBuf, 1, OUT &recvLen, &flags,  &overlapped, NULL);
+        WSARecv(acceptSocket, OUT &wsaBuf, 1, OUT &recvLen, &flags,  &session->overlapped, NULL);
 
     }
   
