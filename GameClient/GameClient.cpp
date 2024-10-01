@@ -5,16 +5,26 @@ using namespace std;
 #include <WinSock2.h>	
 #include <WS2tcpip.h> 
 
-#include <thread> // 스레드 사용
+#include <thread> 
+
+enum IO_TYPE
+{
+    NONE,
+    SEND,
+    RECV,
+};
 
 struct Session
 {
     WSAOVERLAPPED overlapped = {};  
     SOCKET socket = INVALID_SOCKET; 
-    char sendBuffer[512] = {};      
+    IO_TYPE type;
+    char recvBuffer[512] = {};
+    char sendBuffer[512] = {};    
+
 };
 
-void SendThread(HANDLE iocpHandle)
+void SendRecvThread(HANDLE iocpHandle)
 {
     DWORD byteTransferred = 0;
     ULONG_PTR key = 0;
@@ -22,32 +32,36 @@ void SendThread(HANDLE iocpHandle)
 
     while (true)
     {
-        printf("Waiting...\n");
-        if (GetQueuedCompletionStatus(iocpHandle, &byteTransferred, &key, (LPOVERLAPPED*)&session, INFINITE))
+        printf("Waiting....\n");
+
+        GetQueuedCompletionStatus(iocpHandle, &byteTransferred, &key, (LPOVERLAPPED*)&session, INFINITE);
+
+        WSABUF wsaBuf;
+        wsaBuf.buf = session->recvBuffer;
+        wsaBuf.len = sizeof(session->recvBuffer);
+
+        DWORD bufferLen = 0;
+        DWORD flags = 0;
+
+        switch (session->type)
         {
-            WSABUF wsaBuf;
-            wsaBuf.buf = session->sendBuffer;           //송신 버퍼 지정
-            wsaBuf.len = sizeof(session->sendBuffer);   //버퍼의 크기 지정
+        case SEND:
+            session->type = RECV;
+            WSARecv(session->socket, OUT & wsaBuf, 1, OUT & bufferLen, &flags, &session->overlapped, NULL);
+            break;
+        case RECV:
+            printf("Recv : %s\n", session->recvBuffer);
 
+            this_thread::sleep_for(1s);
 
-            DWORD sendLen = 0;  // 송신 데이터 길이를 저장할 변수
-            DWORD flags = 0;    // flag, 현재는 사용하지 않음
-
-            printf("Send : %s\n", session->sendBuffer);
-                
-            //비동기로 Send
-            if (WSASend(session->socket, &wsaBuf, 1, &sendLen, flags, &session->overlapped, NULL))
-            {
-                //Send 실패시 오류 메세지 출력
-                printf("Send failed with error %d\n", WSAGetLastError());
-                //while문 종료
-                break;
-            }
+            session->type = SEND;
+            WSASend(session->socket, &wsaBuf, 1, &bufferLen, flags, &session->overlapped, NULL);
+            break;
+        default:
+            break;
         }
-       
 
-        this_thread::sleep_for(1s);
-        
+
     }
 }
 
@@ -94,7 +108,8 @@ int main()
     printf("Connect to Server\n");
 
     HANDLE iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, NULL);
-    thread t(SendThread, iocpHandle);
+
+    thread t(SendRecvThread, iocpHandle);
 
     ULONG_PTR key = 0;
 
@@ -102,6 +117,7 @@ int main()
 
     Session* session = new Session;
     session->socket = connectSocket;
+    session->type = SEND;
     char sendBuffer[512] = "Hello this is Client";
 
     memcpy(session->sendBuffer, sendBuffer, sizeof(sendBuffer));
@@ -111,7 +127,7 @@ int main()
     wsaBuf.buf = session->sendBuffer;
     wsaBuf.len = sizeof(session->sendBuffer);
 
-
+    DWORD recvLen = 0;
     DWORD sendLen = 0;
     DWORD flags = 0;
 
