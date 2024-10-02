@@ -5,62 +5,24 @@ using namespace std;
 #pragma comment(lib, "Ws2_32.lib")
 #include <WinSock2.h>	
 #include <WS2tcpip.h> 
+#include <MSWSock.h> // 호출
 
 
-enum IO_TYPE
+void AcceptThread(HANDLE iocpHandle)
 {
-    NONE,
-    SEND,
-    RECV,
-};
 
-struct Session
-{
-    WSAOVERLAPPED overlapped = {};
-    SOCKET socket = INVALID_SOCKET;
-    IO_TYPE type;
-    char recvBuffer[512] = {};
-    char sendBuffer[512] = {};
-};
-
-void SendRecvThread(HANDLE iocpHandle)
-{
-    DWORD byteTransferred = 0;
+    DWORD bytesTransferred = 0;
     ULONG_PTR key = 0;
-    Session* session = nullptr;
+    WSAOVERLAPPED overlapped = {};
 
     while (true)
     {
         printf("Waiting....\n");
 
-        GetQueuedCompletionStatus(iocpHandle, &byteTransferred, &key, (LPOVERLAPPED*)&session, INFINITE);
-
-        WSABUF wsaBuf;
-        wsaBuf.buf = session->recvBuffer;
-        wsaBuf.len = sizeof(session->recvBuffer);
-
-        DWORD bufferLen = 0;
-        DWORD flags = 0;
-
-        switch (session->type)
+        if (GetQueuedCompletionStatus(iocpHandle, &bytesTransferred, &key, (LPOVERLAPPED*)&overlapped, INFINITE))
         {
-        case SEND:
-            session->type = RECV;
-            WSARecv(session->socket, OUT & wsaBuf, 1, OUT & bufferLen, &flags, &session->overlapped, NULL);
-            break;
-        case RECV:
-            printf("Recv : %s\n", session->recvBuffer);
-            
-            this_thread::sleep_for(1s);
-
-            session->type = SEND;
-            WSASend(session->socket, &wsaBuf, 1, &bufferLen, flags, &session->overlapped, NULL);
-             break;
-        default:
-            break;
+            printf("Client Connected\n");
         }
-
-       
     }
 }
 
@@ -113,45 +75,58 @@ int main()
     }
 
     printf("listening...\n");
-
+#pragma region Accpet 관리해줄 일꾼 만듬.
     HANDLE iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, NULL);
-     
-    thread t(SendRecvThread, iocpHandle);
+    ULONG_PTR key = 0;
+    CreateIoCompletionPort((HANDLE)listenSocket, iocpHandle, key, 0);
+    thread t(AcceptThread, iocpHandle);
+#pragma endregion
 
-    while (true)
+#pragma region 비동기 Accept 함수 만듬
+    DWORD dwBytes;
+    LPFN_ACCEPTEX lpfnAcceptEx = NULL;
+    GUID guidAcceptEx = WSAID_ACCEPTEX;
+    if (WSAIoctl(listenSocket, SIO_GET_EXTENSION_FUNCTION_POINTER, &guidAcceptEx, sizeof(guidAcceptEx),
+        &lpfnAcceptEx, sizeof(lpfnAcceptEx), &dwBytes, NULL, NULL) == SOCKET_ERROR)
     {
+        printf("WSAIoctl ConnectEx filed with error : %d\n", WSAGetLastError());
+        closesocket(listenSocket);
+        WSACleanup();
+        return 1;
 
+    }
+#pragma endregion
 
-        SOCKET acceptSocket = accept(listenSocket, NULL, NULL);
+#pragma region 빈 Accept용 소켓 만듬
+    SOCKET acceptSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (acceptSocket == INVALID_SOCKET)
+    {
+        printf("Accept socket function failed with error : %d\n", WSAGetLastError());
+        closesocket(listenSocket);
+        WSACleanup();
+        return 1;
+    }
+#pragma endregion
 
-        if (acceptSocket == INVALID_SOCKET)
+#pragma region 비동기 Accept 함수 호출
+
+    char acceptBuffer[1024];
+    WSAOVERLAPPED overlapped = {};
+
+    if (lpfnAcceptEx(listenSocket, acceptSocket, acceptBuffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16,&dwBytes, &overlapped) == FALSE)
+    {
+        if (WSAGetLastError() != ERROR_IO_PENDING)
         {
-            printf("accept failed with error : %d\n", WSAGetLastError());
+            printf("AcceptEx filed with error : %d\n", WSAGetLastError());
             closesocket(listenSocket);
+            closesocket(acceptSocket);
             WSACleanup();
             return 1;
         }
 
-        printf("Client Connected\n");
-        ULONG_PTR key = 0;
-        CreateIoCompletionPort((HANDLE)acceptSocket, iocpHandle, key, 0);
-
-        Session* session = new Session;
-        session->socket = acceptSocket;
-        session->type = RECV;
-
-        WSABUF wsaBuf;
-
-        wsaBuf.buf = session->recvBuffer; 
-        wsaBuf.len = sizeof(session->recvBuffer);
-
-        DWORD recvLen = 0;
-        DWORD flags = 0;
-
-        WSARecv(acceptSocket, OUT &wsaBuf, 1, OUT &recvLen, &flags,  &session->overlapped, NULL);
-
     }
-  
+#pragma endregion
+
 
     t.join();
 
