@@ -1,14 +1,22 @@
 #pragma once
-#include "CorePch.h"
+
+class IocpCore;
+class Listener;
 
 class Service
 {
 private:
 	SOCKADDR_IN sockAddr = {};
+	Listener* listener = nullptr;
+	IocpCore* iocpCore = nullptr;
 public:
-	SOCKADDR_IN GetSockAddr() const { return sockAddr; }
-public :
 	Service(wstring ip, uint16 port);
 	~Service();
+public:
+	SOCKADDR_IN& GetSockAddr() { return sockAddr; }
+	IocpCore* GetIocpCore() const { return iocpCore; }
+
+public:
+	bool Start();
 };
 

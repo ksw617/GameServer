@@ -1,66 +1,56 @@
 #include "pch.h"
 #include "Listener.h"
 #include "Service.h"
+#include "SocketHelper.h"
+#include "IocpCore.h"
 
-Listener::Listener()
-{
-    //추가
-    HANDLE iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, NULL);
-}
 
 Listener::~Listener()
 {
     CloseSocket();
 }
 
-bool Listener::StartAccept(Service& service)
+bool Listener::StartAccept(Service* service)
 {
-    socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+    socket = SocketHelper::CreateSocket();
     if (socket == INVALID_SOCKET)
         return false;
 
-    if (bind(socket, (SOCKADDR*)&service.GetSockAddr(), sizeof(service.GetSockAddr())) == SOCKET_ERROR)
+    if (!SocketHelper::SetReuseAddress(socket, true))
         return false;
 
-    if (listen(socket, SOMAXCONN) == SOCKET_ERROR)
+
+    if (!SocketHelper::SetLinger(socket, 0, 0))
+        return false;
+ 
+    ULONG_PTR key = 0;
+    service->GetIocpCore()->Register((HANDLE)socket, key);
+    //CreateIoCompletionPort((HANDLE)socket, iocpHandle, key, 0);
+
+    if (!SocketHelper::Bind(socket, service->GetSockAddr()))
         return false;
 
-    printf("listening...\n");
-
-    DWORD dwBytes;
-    LPFN_ACCEPTEX lpfnAcceptEx = NULL;
-    GUID guidAcceptEx = WSAID_ACCEPTEX;
-
-    if (WSAIoctl(socket, SIO_GET_EXTENSION_FUNCTION_POINTER, &guidAcceptEx, sizeof(guidAcceptEx),
-        &lpfnAcceptEx, sizeof(lpfnAcceptEx), &dwBytes, NULL, NULL) == SOCKET_ERROR)
+    if (!SocketHelper::Listen(socket))
         return false;
 
-    SOCKET acceptSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+    SOCKET acceptSocket = SocketHelper::CreateSocket();
     if (acceptSocket == INVALID_SOCKET)
         return false;
 
-    //추가
-    ULONG_PTR key = 0;
-    CreateIoCompletionPort((HANDLE)socket, iocpHandle, key, 0);
-
-
     char acceptBuffer[1024];
     WSAOVERLAPPED overlapped = {};
+    DWORD dwBytes = 0;
 
-    if (lpfnAcceptEx(socket, acceptSocket, acceptBuffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &dwBytes, &overlapped) == FALSE)
+    if (SocketHelper::AcceptEx(socket, acceptSocket, acceptBuffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &dwBytes, &overlapped) == FALSE)
     {
         if (WSAGetLastError() != ERROR_IO_PENDING)
             return false;
     }
 
-    return false;
+    return true;
 }
 
 void Listener::CloseSocket()
 {
-    if (socket != INVALID_SOCKET)
-    {
-        closesocket(socket);
-        socket = INVALID_SOCKET;
-    }
+    SocketHelper::CloseSocket(socket);
 }

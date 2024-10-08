@@ -2,6 +2,7 @@
 #include "pch.h"
 #include <Service.h>
 #include <Listener.h>
+#include <IocpCore.h>
 
 void AcceptThread(HANDLE iocpHandle)
 {
@@ -25,15 +26,17 @@ int main()
 {
     printf("============== Server  ================\n");
 
-    Service service(L"127.0.0.1", 27015);
+    Service* serverService = new Service(L"127.0.0.1", 27015);
+    thread t(AcceptThread, serverService->GetIocpCore()->GetHandle());
 
-    Listener listener;
-
-    thread t(AcceptThread, listener.GetHandle());
-
-    listener.StartAccept(service);
+    //서비스 실행
+    serverService->Start();
 
     t.join();
+
+    //해제
+    delete serverService;
+
 
     return 0;
 }
