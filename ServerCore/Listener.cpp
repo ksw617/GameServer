@@ -3,6 +3,8 @@
 #include "Service.h"
 #include "SocketHelper.h"
 #include "IocpCore.h"
+#include "Session.h"
+#include "IocpEvent.h"
 
 
 Listener::~Listener()
@@ -24,8 +26,8 @@ bool Listener::StartAccept(Service* service)
         return false;
  
     ULONG_PTR key = 0;
-    service->GetIocpCore()->Register((HANDLE)socket, key);
-    //CreateIoCompletionPort((HANDLE)socket, iocpHandle, key, 0);
+    //내꺼 넣어주고
+    service->GetIocpCore()->Register(this);
 
     if (!SocketHelper::Bind(socket, service->GetSockAddr()))
         return false;
@@ -33,24 +35,43 @@ bool Listener::StartAccept(Service* service)
     if (!SocketHelper::Listen(socket))
         return false;
 
-    SOCKET acceptSocket = SocketHelper::CreateSocket();
-    if (acceptSocket == INVALID_SOCKET)
-        return false;
-
-    char acceptBuffer[1024];
-    WSAOVERLAPPED overlapped = {};
-    DWORD dwBytes = 0;
-
-    if (SocketHelper::AcceptEx(socket, acceptSocket, acceptBuffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &dwBytes, &overlapped) == FALSE)
-    {
-        if (WSAGetLastError() != ERROR_IO_PENDING)
-            return false;
-    }
+    AcceptEvent* acceptEvent = new AcceptEvent;
+    //AcceptEvent는 Listener랑 연결
+    acceptEvent->owner = this;
+    RegisterAccept(acceptEvent);
 
     return true;
+}
+
+void Listener::RegisterAccept(AcceptEvent* acceptEvent)
+{
+    Session* session = new Session;
+    acceptEvent->Init();
+    acceptEvent->session = session;
+
+    DWORD dwBytes = 0;
+               
+    if (!SocketHelper::AcceptEx(socket, session->GetSocket(), session->recvBuffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &dwBytes, (LPOVERLAPPED)acceptEvent))
+    {
+        if (WSAGetLastError() != ERROR_IO_PENDING)
+            RegisterAccept(acceptEvent);
+    }
+}
+
+void Listener::ProcessAccept(AcceptEvent* acceptEvent)
+{
+    printf("ProcessAccept\n");
+    //Todo
 }
 
 void Listener::CloseSocket()
 {
     SocketHelper::CloseSocket(socket);
+}
+
+
+//GetQueuedCompletionStatus 호출되면 할당된애가 Listener라면 여리고 들어옴
+void Listener::ObserveIO(IocpEvent* iocpEvent, DWORD byteTransferred)
+{
+    ProcessAccept((AcceptEvent*)iocpEvent);
 }
