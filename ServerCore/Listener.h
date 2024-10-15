@@ -2,25 +2,25 @@
 #include "IocpObj.h"
 
 class AcceptEvent;
+class ServerService;
 
 class Listener : public IocpObj
 {
 private:
+	//ServerSercie 추가
+	ServerService* serverService = nullptr;
 	SOCKET socket = INVALID_SOCKET;
 public:
 	Listener() = default;
-	~Listener();
+	virtual ~Listener();
 public:
-	bool StartAccept(class Service* service);
-	void RegisterAccept(AcceptEvent* acceptEvent);
-	
-	//Accept 진행할 용도로 
+	bool StartAccept(ServerService* service);
+	void RegisterAccept(AcceptEvent* acceptEvent);	
 	void ProcessAccept(AcceptEvent* acceptEvent);
 	void CloseSocket();
 	
 
 public:
-	//가상함수 제정의
 	HANDLE GetHandle() override { return (HANDLE)socket; };
 	void ObserveIO(IocpEvent* iocpEvent, DWORD byteTransferred) override;
 };

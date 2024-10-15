@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Listener.h"
-#include "Service.h"
+#include "ServerService.h"
 #include "SocketHelper.h"
 #include "IocpCore.h"
 #include "Session.h"
@@ -12,8 +12,11 @@ Listener::~Listener()
     CloseSocket();
 }
 
-bool Listener::StartAccept(Service* service)
+bool Listener::StartAccept(ServerService* service)
 {
+    //처음 생성될때 받고
+    serverService = service;
+
     socket = SocketHelper::CreateSocket();
     if (socket == INVALID_SOCKET)
         return false;
@@ -26,7 +29,6 @@ bool Listener::StartAccept(Service* service)
         return false;
  
     ULONG_PTR key = 0;
-    //내꺼 넣어주고
     service->GetIocpCore()->Register(this);
 
     if (!SocketHelper::Bind(socket, service->GetSockAddr()))
@@ -35,8 +37,8 @@ bool Listener::StartAccept(Service* service)
     if (!SocketHelper::Listen(socket))
         return false;
 
+
     AcceptEvent* acceptEvent = new AcceptEvent;
-    //AcceptEvent는 Listener랑 연결
     acceptEvent->owner = this;
     RegisterAccept(acceptEvent);
 
@@ -45,7 +47,9 @@ bool Listener::StartAccept(Service* service)
 
 void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 {
-    Session* session = new Session;
+    //이거 대신에
+    //Session* session = new Session;
+    Session* session = serverService->CreateSession();
     acceptEvent->Init();
     acceptEvent->session = session;
 
@@ -60,8 +64,37 @@ void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 
 void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 {
+    Session* session = acceptEvent->session;
+
+    if (!SocketHelper::SetUpdateAcceptSocket(session->GetSocket(), socket))
+    {
+        printf("SetUpdateAcceptSocket Error\n");
+        RegisterAccept(acceptEvent);
+        return;
+    }
+
     printf("ProcessAccept\n");
-    //Todo
+
+    SOCKADDR_IN sockAddr;
+    int sockAddrSize = sizeof(sockAddr); 
+    //Accept Socket을 넣어주면 sockAddr에다가 클라의 주소 정보를 넣어줌
+    //SOCKET_ERROR라면 문제 있는거니까 에러 처리
+    if (getpeername(session->GetSocket(), (SOCKADDR*)&sockAddr, &sockAddrSize) == SOCKET_ERROR)
+    {
+        //에러처리
+        printf("getpeername Error\n");
+        RegisterAccept(acceptEvent);
+        return;
+    }
+
+    //session에 클라의 주소를 업데이트
+    session->SetSockAddr(sockAddr);
+
+    //연결된거니까 해당 Session에 ProcessConnect를 진행시켜줘
+    session->ProcessConnect();
+
+    //다음 손님 받을 준비. 다른 클라가 접속할수 있게 Accept등록처리
+    RegisterAccept(acceptEvent);   
 }
 
 void Listener::CloseSocket()
@@ -70,7 +103,7 @@ void Listener::CloseSocket()
 }
 
 
-//GetQueuedCompletionStatus 호출되면 할당된애가 Listener라면 여리고 들어옴
+
 void Listener::ObserveIO(IocpEvent* iocpEvent, DWORD byteTransferred)
 {
     ProcessAccept((AcceptEvent*)iocpEvent);

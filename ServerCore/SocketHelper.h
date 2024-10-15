@@ -2,7 +2,6 @@
 class SocketHelper
 {		   
 public:
-	//비동기 함수 포인터들
 	static LPFN_ACCEPTEX AcceptEx;
 public:
 	static bool StartUp();
@@ -14,6 +13,8 @@ public:
 public:
 	static bool SetReuseAddress(SOCKET socket, bool enable);
 	static bool SetLinger(SOCKET socket, u_short onOff, u_short time);
+	//Listen Socket에 있는 정보들을 Accpet Socket에 업데이트 하기 위해
+	static bool SetUpdateAcceptSocket(SOCKET acceptSocket, SOCKET listenSocket);
 public:
 	static bool Bind(SOCKET socket, SOCKADDR_IN sockAddr);
 	static bool Listen(SOCKET socket, int baclog = SOMAXCONN);

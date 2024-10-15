@@ -7,6 +7,9 @@
     <Filter Include="Network">
       <UniqueIdentifier>{367d56b7-052a-47f9-ae93-305253264efd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network\Service">
+      <UniqueIdentifier>{627ba15a-4e98-4a98-a4ce-32fa562f7650}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -14,9 +17,6 @@
     </ClCompile>
     <ClCompile Include="CorePch.cpp">
       <Filter>PCH</Filter>
-    </ClCompile>
-    <ClCompile Include="Service.cpp">
-      <Filter>Network</Filter>
     </ClCompile>
     <ClCompile Include="Listener.cpp">
       <Filter>Network</Filter>
@@ -36,6 +36,15 @@
     <ClCompile Include="IocpObj.cpp">
       <Filter>Network</Filter>
     </ClCompile>
+    <ClCompile Include="Service.cpp">
+      <Filter>Network\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerService.cpp">
+      <Filter>Network\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientService.cpp">
+      <Filter>Network\Service</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -43,9 +52,6 @@
     </ClInclude>
     <ClInclude Include="CorePch.h">
       <Filter>PCH</Filter>
-    </ClInclude>
-    <ClInclude Include="Service.h">
-      <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="Listener.h">
       <Filter>Network</Filter>
@@ -64,6 +70,15 @@
     </ClInclude>
     <ClInclude Include="IocpObj.h">
       <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Service.h">
+      <Filter>Network\Service</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerService.h">
+      <Filter>Network\Service</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientService.h">
+      <Filter>Network\Service</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

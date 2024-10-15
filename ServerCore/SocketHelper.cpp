@@ -9,13 +9,8 @@ bool SocketHelper::StartUp()
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
 		return false;
 
-	//Accept 비동기 함수 주소를 얻기 위해서 임시 적으로 만듬
 	SOCKET tempSocket = CreateSocket();
-	
-	//AcceptEx에 Accept 비동기 함수 주소 넣어줌
 	SetIoControl(tempSocket, WSAID_ACCEPTEX, (LPVOID*)&AcceptEx);
-		
-	//임시적으로 만든거니까 닫아줘야함
 	CloseSocket(tempSocket);
 
 	return true;
@@ -58,6 +53,12 @@ bool SocketHelper::SetLinger(SOCKET socket, u_short onOff, u_short time)
 	linger.l_onoff = onOff;
 	linger.l_linger = time;
 	return SetSocketOpt(socket, SOL_SOCKET, SO_LINGER, linger);
+}
+
+//Update 함수 만듬
+bool SocketHelper::SetUpdateAcceptSocket(SOCKET acceptSocket, SOCKET listenSocket)
+{
+	return SetSocketOpt(acceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, listenSocket);
 }
 
 bool SocketHelper::Bind(SOCKET socket, SOCKADDR_IN sockAddr)

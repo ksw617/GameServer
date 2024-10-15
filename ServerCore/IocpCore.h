@@ -9,8 +9,8 @@ public:
 public:
 	HANDLE GetHandle() const { return iocpHandle; }
 public:
-	//HANDLE socket, ULONG_PTR key -> IocpObj* iocpObj
-	void Register(class IocpObj* iocpObj);
+	//bool ·Î ¹Ù²Þ
+	bool Register(class IocpObj* iocpObj);
 	bool ObserveIO(DWORD time = INFINITE);
 };
 
