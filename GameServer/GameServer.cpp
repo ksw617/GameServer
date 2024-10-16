@@ -14,6 +14,9 @@ public:
     virtual int OnRecv(BYTE* buffer, int len) override
     {
         printf("Recv : %s\n", buffer);
+
+        //고대로 보내기
+        Send(buffer, len);
         return len; 
     }
 

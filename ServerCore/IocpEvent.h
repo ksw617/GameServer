@@ -31,10 +31,17 @@ public:
 };
 
 
-//RECV 추가
 class RecvEvent : public IocpEvent
 {
 public:
-public:
 	RecvEvent() : IocpEvent(EventType::RECV) {}
+};
+
+//Send 추가
+class SendEvent : public IocpEvent
+{
+public:
+	vector<BYTE> sendBuffer;
+public:
+	SendEvent() : IocpEvent(EventType::SEND) {}
 };

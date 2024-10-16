@@ -52,25 +52,74 @@ void Session::RegisterRecv()
 	
 }
 
+void Session::Send(BYTE* buffer, int len)
+{
+	//SendEvent 만들기
+	SendEvent* sendEvent = new SendEvent();
+
+	//sendEvent의 주인은 나 자신
+	sendEvent->owner = this;
+
+	//sendEvent의 vector<Byte>의 크기값 설정
+	sendEvent->sendBuffer.resize(len);
+
+	//공간에다가 buffer의 내용을 복붙
+	memcpy(sendEvent->sendBuffer.data(), buffer, len);
+
+	//lock을 잡고
+	unique_lock<shared_mutex> lock(rwLock);
+
+	//보낼꺼 등록하기
+	RegisterSend(sendEvent);
+}
+
+
+void Session::RegisterSend(SendEvent* sendEvent)
+{
+	//연결 상태가 아니라면 못 보냄
+	if (!IsConnected())
+		return;
+
+	//WSASend 설정
+	WSABUF wsaBuf;
+	//sendEvent에 있는 버퍼 데이터와 크기
+	wsaBuf.buf = (char*)sendEvent->sendBuffer.data();
+	wsaBuf.len = sendEvent->sendBuffer.size();
+
+	DWORD sendLen = 0;
+	DWORD flags = 0;
+
+	//WSASend 호출
+	if (WSASend(socket, &wsaBuf, 1, &sendLen, flags, sendEvent, nullptr) == SOCKET_ERROR)
+	{
+		//에러 코드 받기
+		int errorCode = WSAGetLastError();
+		//에러 발생시
+		if (errorCode != WSA_IO_PENDING)
+		{
+			//에러 표시
+			HandleError(errorCode);
+			//sendEvent의 주인은 없고
+			sendEvent->owner = nullptr;
+
+			//sendEvent 삭제
+			delete sendEvent;
+		}
+	}
+}
+
+
 void Session::Disconnect(const WCHAR* cause)
 {
-	//isConncted = false;
-	//exchage가 원래 isConnected가 들구 있는 값을 반환
-	//isConncted가 최초 true인 상황일때만 false로 변환 시켜주고 원래 들고 있던true값 반환
-	//그담 부터는 isConncted == flase니까 계속 flase 반환
 	if (isConnected.exchange(false) == false)
 		return;
 
-	//왜 연결 끊어는지 원이 표시
 	wprintf(L"Disconnect reason : $ls\n", cause);
 
-	//아직 연결 끊기 전에 ServerSession에 있는 OnDisconnected 호출
 	OnDisconnected();
 
-	//소켓 닫아주고
 	SocketHelper::CloseSocket(socket);
 
-	//현재 Service에서 내꺼 session을 제거
 	GetService()->RemoveSession(this);
 }
 
@@ -81,6 +130,8 @@ void Session::ObserveIO(IocpEvent* iocpEvent, DWORD byteTransferred)
 	case EventType::RECV:
 		ProcessRecv(byteTransferred);
 		break;
+	case EventType::SEND:
+		ProcessSend((SendEvent*)iocpEvent, byteTransferred);
 	default:
 		break;
 	}
@@ -94,7 +145,6 @@ void Session::ProcessRecv(int bytesTransferred)
 
 	if (bytesTransferred <= 0)
 	{
-		//받은거 없다고 연결 끊기
 		Disconnect(L"Recv 0 bytes");
 		return;
 	}
@@ -102,6 +152,11 @@ void Session::ProcessRecv(int bytesTransferred)
 	OnRecv(recvBuffer, bytesTransferred);
 
 	RegisterRecv();
+}
+
+void Session::ProcessSend(SendEvent* sendEvent, int bytesTransferred)
+{
+	printf("보냄\n");
 }
 
 void Session::HandleError(int errorCode)
