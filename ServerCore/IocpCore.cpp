@@ -2,6 +2,7 @@
 #include "IocpCore.h"
 #include "IocpEvent.h"
 #include "IocpObj.h"
+#include "Session.h"
 
 IocpCore::IocpCore()
 {
@@ -24,11 +25,12 @@ bool IocpCore::ObserveIO(DWORD time)
     ULONG_PTR key = 0;
     IocpEvent* iocpEvent = nullptr;
 
-    printf("Waiting....\n");
+    //printf("Waiting....\n");
     if (GetQueuedCompletionStatus(iocpHandle, &bytesTransferred, &key, (LPOVERLAPPED*)&iocpEvent, INFINITE))
     {
     
-        //Listener                   
+        //AcceptEvent -> Listener
+        //RecvEvent -> Session               
         IocpObj* iocpObj = iocpEvent->owner;
         iocpObj->ObserveIO(iocpEvent, bytesTransferred);
 

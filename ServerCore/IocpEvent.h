@@ -14,7 +14,6 @@ class IocpEvent : public OVERLAPPED
 {
 public:
 	EventType eventType;
-	//나를 들고 있는 주체가 누구인지
 	class IocpObj* owner = nullptr;
 public:
 	IocpEvent(EventType type);
@@ -31,3 +30,11 @@ public:
 	AcceptEvent() : IocpEvent(EventType::ACCEPT) {}
 };
 
+
+//RECV 추가
+class RecvEvent : public IocpEvent
+{
+public:
+public:
+	RecvEvent() : IocpEvent(EventType::RECV) {}
+};

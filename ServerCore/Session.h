@@ -1,13 +1,19 @@
 #pragma once
 #include "IocpObj.h"
-//클라는 하나씩, 서버는 accpet 할때마다 생성
+
+class Service;
+
 class Session : public IocpObj
 {
+	friend class Listener;
+
 private:
+	atomic<bool> isConnected = false;
+	Service* service = nullptr;
 	SOCKET socket = INVALID_SOCKET;
-	//클라이언트라면 서버의 주소
-	//서버면 클라이언트의 주소
 	SOCKADDR_IN sockAddr = {};
+private:
+	RecvEvent recvEvent;
 public:
 	BYTE recvBuffer[1024] = {};
 public:
@@ -16,11 +22,27 @@ public:
 public:
 	SOCKET GetSocket() const { return socket; }
 	HANDLE GetHandle() override { return (HANDLE)socket; };
+	Service* GetService() const { return service; }
+	bool IsConnected() const { return isConnected; }
 public:
 	void SetSockAddr(SOCKADDR_IN address) { sockAddr = address; }
-public:
-	//연결진행
+	void SetService(Service* _service) { service = _service; }
+private:
+	void RegisterRecv();
+private:
 	void ProcessConnect();
+	void ProcessRecv(int bytesTransferred);
+private:
+	void HandleError(int errorCode);
+public:
+	virtual void OnConnected() {}
+	virtual int OnRecv(BYTE* buffer, int len) { return len; }
+	//Disconnect 되었을때 호출 용도
+	virtual void OnDisconnected() {}
+public:
+	//연결 끊기
+	void Disconnect(const WCHAR* cause);
+public:
 	void ObserveIO(IocpEvent* iocpEvent, DWORD byteTransferred) override;
 
 };

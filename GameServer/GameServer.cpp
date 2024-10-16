@@ -1,14 +1,33 @@
 #pragma once
 #include "pch.h"
 #include <ServerService.h>
-#include <IocpCore.h>
+#include <Session.h>
 
+class ServerSession : public Session
+{
+public:
+    virtual void OnConnected() override
+    {
+        printf("Connected...\n");
+    }
+
+    virtual int OnRecv(BYTE* buffer, int len) override
+    {
+        printf("Recv : %s\n", buffer);
+        return len; 
+    }
+
+    virtual void OnDisconnected() override
+    {
+        printf("Disconnected...\n");
+    }
+};
 
 int main()
 {
     printf("============== Server  ================\n");
 
-    Service* serverService = new ServerService(L"127.0.0.1", 27015);
+    Service* serverService = new ServerService(L"127.0.0.1", 27015, []() {return new ServerSession; });
 
     thread t
     (
@@ -21,12 +40,10 @@ int main()
         }
     );
 
-    //서비스 실행
     serverService->Start();
 
     t.join();
 
-    //해제
     delete serverService;
 
 

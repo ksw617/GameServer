@@ -2,7 +2,6 @@
 #include <iostream>
 using namespace std;
 
-#include <functional>
 
 #pragma region STL
 #include <vector>

@@ -14,7 +14,6 @@ Listener::~Listener()
 
 bool Listener::StartAccept(ServerService* service)
 {
-    //처음 생성될때 받고
     serverService = service;
 
     socket = SocketHelper::CreateSocket();
@@ -47,9 +46,8 @@ bool Listener::StartAccept(ServerService* service)
 
 void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 {
-    //이거 대신에
-    //Session* session = new Session;
-    Session* session = serverService->CreateSession();
+    Session* session = serverService->CreateSession();  
+
     acceptEvent->Init();
     acceptEvent->session = session;
 
@@ -77,23 +75,16 @@ void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 
     SOCKADDR_IN sockAddr;
     int sockAddrSize = sizeof(sockAddr); 
-    //Accept Socket을 넣어주면 sockAddr에다가 클라의 주소 정보를 넣어줌
-    //SOCKET_ERROR라면 문제 있는거니까 에러 처리
     if (getpeername(session->GetSocket(), (SOCKADDR*)&sockAddr, &sockAddrSize) == SOCKET_ERROR)
     {
-        //에러처리
         printf("getpeername Error\n");
         RegisterAccept(acceptEvent);
         return;
     }
 
-    //session에 클라의 주소를 업데이트
     session->SetSockAddr(sockAddr);
 
-    //연결된거니까 해당 Session에 ProcessConnect를 진행시켜줘
     session->ProcessConnect();
-
-    //다음 손님 받을 준비. 다른 클라가 접속할수 있게 Accept등록처리
     RegisterAccept(acceptEvent);   
 }
 
