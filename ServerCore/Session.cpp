@@ -10,6 +10,7 @@ Session::Session()
 
 Session::~Session()
 {
+	printf("~Session\n");
 	SocketHelper::CloseSocket(socket);
 }
 
@@ -20,7 +21,8 @@ void Session::RegisterRecv()
 		return;
 		
 	recvEvent.Init();
-	recvEvent.owner = this;
+	//this -> shared_from_this()
+	recvEvent.owner = shared_from_this();
 
 	WSABUF wsaBuf;
 	wsaBuf.buf = (char*)recvBuffer;
@@ -57,7 +59,8 @@ bool Session::RegisterConnect()
 		return false;
 
 	connectEvent.Init();
-	connectEvent.owner = this;
+	//this -> shared_from_this()
+	connectEvent.owner = shared_from_this();
 
 	DWORD bytesTransferred = 0;
 	SOCKADDR_IN sockAddr = GetService()->GetSockAddr();
@@ -79,12 +82,12 @@ bool Session::RegisterConnect()
 
 void Session::ProcessConnect()
 {
-	//Connect 이벤트에 있는 owner를 null로 밀기
 	connectEvent.owner = nullptr;
 
 	isConnected.store(true);
 
-	GetService()->AddSession(this);
+	//this -> static_pointer_cast<Session>(shared_from_this())
+	GetService()->AddSession(static_pointer_cast<Session>(shared_from_this()));
 
 	OnConnected();
 
@@ -97,8 +100,8 @@ void Session::ProcessConnect()
 void Session::Send(BYTE* buffer, int len)
 {
 	SendEvent* sendEvent = new SendEvent();
-
-	sendEvent->owner = this;
+	//this -> shared_from_this()
+	sendEvent->owner = shared_from_this();
 
 	sendEvent->sendBuffer.resize(len);
 
@@ -134,27 +137,12 @@ void Session::RegisterSend(SendEvent* sendEvent)
 }
 
 
-void Session::Disconnect(const WCHAR* cause)
-{
-	if (isConnected.exchange(false) == false)
-		return;
-
-	wprintf(L"Disconnect reason : $ls\n", cause);
-
-	OnDisconnected();
-
-	SocketHelper::CloseSocket(socket);
-
-	GetService()->RemoveSession(this);
-}
 
 void Session::ObserveIO(IocpEvent* iocpEvent, DWORD byteTransferred)
 {
 	switch (iocpEvent->eventType)
 	{
-		//Event Type이 Connect라면
 	case EventType::CONNECT:
-		//Connect 진행
 		ProcessConnect();
 		break;
 	case EventType::RECV:
@@ -162,6 +150,9 @@ void Session::ObserveIO(IocpEvent* iocpEvent, DWORD byteTransferred)
 		break;
 	case EventType::SEND:
 		ProcessSend((SendEvent*)iocpEvent, byteTransferred);
+	case EventType::DISCONNECT:	 
+		ProcessDisconnect();
+		break;
 	default:
 		break;
 	}
@@ -198,15 +189,62 @@ void Session::ProcessSend(SendEvent* sendEvent, int bytesTransferred)
 	OnSend(bytesTransferred);
 }
 
+void Session::Disconnect(const WCHAR* cause)
+{
+	if (isConnected.exchange(false) == false)
+		return;
+
+	wprintf(L"Disconnect reason : %ls\n", cause);
+
+	OnDisconnected();
+	//this -> static_pointer_cast<Session>(shared_from_this())
+	GetService()->RemoveSession(static_pointer_cast<Session>(shared_from_this()));
+
+	RegisterDisconnect();
+}
+
+bool Session::RegisterDisconnect()
+{
+	disconnectEvent.Init();
+	//this -> shared_from_this()
+	disconnectEvent.owner = shared_from_this();
+
+	if (SocketHelper::DisconnectEx(socket, &disconnectEvent, TF_REUSE_SOCKET, 0))
+	{
+		int errorCode = WSAGetLastError();
+
+		if (errorCode != WSA_IO_PENDING)
+		{
+			HandleError(errorCode);
+			disconnectEvent.owner = nullptr;
+
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+
+
+void Session::ProcessDisconnect()
+{
+	//disconnectEvent owner는 null로 밀고
+	disconnectEvent.owner = nullptr;
+}
+
 void Session::HandleError(int errorCode)
 {
 	switch (errorCode)
 	{
 	case WSAECONNRESET:
 	case WSAECONNABORTED:
-		printf("Handle Error\n");
+		//에러일 경우에도 Disconnect
+		Disconnect(L"Handle Error");
 		break;
 	default:
+		printf("Error Code : %d\n", errorCode);
 		break;
 	}
 }

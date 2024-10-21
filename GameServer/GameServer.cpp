@@ -34,7 +34,8 @@ int main()
 {
     printf("============== Server  ================\n");
 
-    Service* serverService = new ServerService(L"127.0.0.1", 27015, []() {return new ServerSession; });
+    //Service* serverService = new ServerService(L"127.0.0.1", 27015, []() {return new ServerSession; });
+    shared_ptr<Service> serverService = make_shared<ServerService>((L"127.0.0.1", 27015, []() {return new ServerSession; }));
 
     thread t
     (
@@ -51,7 +52,7 @@ int main()
 
     t.join();
 
-    delete serverService;
+   // delete serverService;
 
 
     return 0;

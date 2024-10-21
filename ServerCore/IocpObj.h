@@ -1,6 +1,7 @@
 #pragma once
-#include "IocpEvent.h" // 빨간줄 때문에 
-class IocpObj
+#include "IocpEvent.h"
+//IocpObj를 스마트 포인터로 레퍼 관리
+class IocpObj : public enable_shared_from_this<IocpObj>
 {
 public:
 	virtual HANDLE GetHandle() abstract;

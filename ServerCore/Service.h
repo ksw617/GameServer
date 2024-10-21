@@ -4,7 +4,8 @@
 class IocpCore;
 class Session;
 
-using SessionFactory = function<Session*(void)>;
+//스마트 포인터로 관리
+using SessionFactory = function<shared_ptr<Session>(void)>;
 
 enum class ServiceType : uint8
 {
@@ -13,15 +14,18 @@ enum class ServiceType : uint8
 	CLIENT,
 };
 
-class Service
+//Service도 스마트 포인터로 레퍼 관리
+class Service  : public enable_shared_from_this<Service>
 {
 private:
 	ServiceType serviceType = ServiceType::NONE;
 	SOCKADDR_IN sockAddr = {};
-	IocpCore* iocpCore = nullptr;
+	//스마트 포인터로 관리
+	shared_ptr<IocpCore> iocpCore;
 protected:
 	shared_mutex rwLock;
-	set<Session*> sessions;
+	//스마트 포인터로 관리
+	set<shared_ptr<Session>> sessions;
 	int sessionCount = 0;
 	SessionFactory sessionFactory;		
 public:
@@ -30,12 +34,14 @@ public:
 public:
 	ServiceType GetServiceType() const { return serviceType; }
 	SOCKADDR_IN& GetSockAddr() { return sockAddr; }
-	IocpCore* GetIocpCore() const { return iocpCore; }
+	//스마트 포인터
+	shared_ptr<IocpCore> GetIocpCore() const { return iocpCore; }
 	int GetSessionCount() const { return sessionCount; }
 public:
-	Session* CreateSession();
-	void AddSession(Session* session);
-	void RemoveSession(Session* session);
+	//스마트 포인터로 관리
+	shared_ptr<Session> CreateSession();
+	void AddSession(shared_ptr<Session> session);
+	void RemoveSession(shared_ptr<Session> session);
 	
 public:
 	virtual bool Start() abstract;

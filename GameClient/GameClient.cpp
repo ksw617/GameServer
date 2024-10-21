@@ -33,6 +33,7 @@ public:
 
     virtual void OnDisconnected() override
     {
+        printf("Disconnected...\n");
     }
 };
 
@@ -41,8 +42,8 @@ int main()
     this_thread::sleep_for(1s);
 
     printf("============== Client  ================\n");
-
-    Service* clientService = new ClientService(L"127.0.0.1", 27015, []() {return new ClientSession; });
+    //Service* serverService = new ServerService(L"127.0.0.1", 27015, []() {return new ServerSession; });
+    shared_ptr<Service> clientService = make_shared<ClientService>(L"127.0.0.1", 27015, []() {return new ClientSession; });
 
     if (!clientService->Start())
     {
@@ -65,7 +66,7 @@ int main()
 
     t.join();
 
-    delete clientService;
+    //delete clientService;
 
 
     return 0;

@@ -8,16 +8,18 @@ ServerService::ServerService(wstring ip, uint16 port, SessionFactory factory) : 
 
 ServerService::~ServerService()
 {
-    if (listener != nullptr)
-    {
-        delete listener;
-        listener = nullptr;
-    }
+   // if (listener != nullptr)
+   // {
+   //     delete listener;
+   //     listener = nullptr;
+   // }
 
 }
 
 bool ServerService::Start()
 {
-    listener = new Listener;
-    return listener->StartAccept(this);
+    //listener = new Listener;
+    listener = make_shared<Listener>();
+    //this -> shared_from_this() 
+    return listener->StartAccept(static_pointer_cast<ServerService>(shared_from_this()));
 }

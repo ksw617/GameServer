@@ -17,28 +17,31 @@ Service::Service(ServiceType type, wstring ip, uint16 port, SessionFactory facto
     sockAddr.sin_addr = address;
     sockAddr.sin_port = htons(port);
 
-    iocpCore = new IocpCore;
+    //make_shared<자료형> 스마트 포인터에 할당
+    //iocpCore = new IocpCore
+    iocpCore = make_shared<IocpCore>();
 }
 
 Service::~Service()
 {
-    if (iocpCore != nullptr)
-    {
-        delete iocpCore;
-        iocpCore = nullptr;
-    }
+   //if (iocpCore != nullptr)
+   //{
+   //    delete iocpCore;
+   //    iocpCore = nullptr;
+   //}
 
 
     SocketHelper::CleanUp();
 }
 
-
-Session* Service::CreateSession()
+//스마트 포인터로 변환
+shared_ptr<Session> Service::CreateSession()
 {
-    Session* session = sessionFactory();
+    //스마트 포인터로 변환
+    shared_ptr<Session> session = sessionFactory();
 
-    //session 만들어지자 마자 해당 Service 등록
-    session->SetService(this);
+    //this -> shared_from_this
+    session->SetService(shared_from_this());
 
     if (!iocpCore->Register(session))
         return nullptr;
@@ -47,14 +50,15 @@ Session* Service::CreateSession()
    
 }
 
-void Service::AddSession(Session* session)
+//스마트 포인터로 변환
+void Service::AddSession(shared_ptr<Session> session)
 {
     unique_lock<shared_mutex> lock(rwLock);
     sessionCount++;
     sessions.insert(session);
 }
-
-void Service::RemoveSession(Session* session)
+//스마트 포인터로 변환
+void Service::RemoveSession(shared_ptr<Session> session)
 {
     unique_lock<shared_mutex> lock(rwLock);
     sessions.erase(session);

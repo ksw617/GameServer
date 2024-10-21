@@ -12,7 +12,8 @@ Listener::~Listener()
     CloseSocket();
 }
 
-bool Listener::StartAccept(ServerService* service)
+//스마트 포인터로 변환
+bool Listener::StartAccept(shared_ptr<ServerService> service)
 {
     serverService = service;
 
@@ -28,7 +29,8 @@ bool Listener::StartAccept(ServerService* service)
         return false;
  
     ULONG_PTR key = 0;
-    service->GetIocpCore()->Register(this);
+    //this ->  shared_from_this()
+    service->GetIocpCore()->Register(shared_from_this());
 
     if (!SocketHelper::Bind(socket, service->GetSockAddr()))
         return false;
@@ -38,7 +40,8 @@ bool Listener::StartAccept(ServerService* service)
 
 
     AcceptEvent* acceptEvent = new AcceptEvent;
-    acceptEvent->owner = this;
+    //this ->  shared_from_this()
+    acceptEvent->owner = shared_from_this();
     RegisterAccept(acceptEvent);
 
     return true;
@@ -46,7 +49,8 @@ bool Listener::StartAccept(ServerService* service)
 
 void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 {
-    Session* session = serverService->CreateSession();  
+    //스마트 포인터로 변환
+    shared_ptr<Session> session = serverService->CreateSession();  
 
     acceptEvent->Init();
     acceptEvent->session = session;
@@ -62,7 +66,8 @@ void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 
 void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 {
-    Session* session = acceptEvent->session;
+    //스마트 포인터로 변환
+    shared_ptr<Session> session = acceptEvent->session;
 
     if (!SocketHelper::SetUpdateAcceptSocket(session->GetSocket(), socket))
     {

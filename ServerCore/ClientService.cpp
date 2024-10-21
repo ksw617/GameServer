@@ -8,7 +8,8 @@ ClientService::ClientService(wstring ip, uint16 port, SessionFactory factory) : 
 
 bool ClientService::Start()
 {
-    Session* session = CreateSession();
+    //스마트 포인터로 변환
+    shared_ptr<Session> session = CreateSession();
     return session->Connect();
     
 }

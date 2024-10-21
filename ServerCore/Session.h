@@ -10,13 +10,14 @@ class Session : public IocpObj
 private:
 	shared_mutex rwLock;	
 	atomic<bool> isConnected = false;
-	Service* service = nullptr;
+	//스마트 포인터로 변환
+	shared_ptr<Service> service = nullptr;
 	SOCKET socket = INVALID_SOCKET;
 	SOCKADDR_IN sockAddr = {};
 private:
-	//Connect 이벤트 추가
 	ConnectEvent connectEvent;
 	RecvEvent recvEvent;
+	DisconnectEvent disconnectEvent;
 public:
 	BYTE recvBuffer[1024] = {};
 public:
@@ -25,20 +26,24 @@ public:
 public:
 	SOCKET GetSocket() const { return socket; }
 	HANDLE GetHandle() override { return (HANDLE)socket; };
-	Service* GetService() const { return service; }
+	//스마트 포인터로 변환
+	shared_ptr<Service> GetService() const { return service; }
 	bool IsConnected() const { return isConnected; }
 public:
 	void SetSockAddr(SOCKADDR_IN address) { sockAddr = address; }
-	void SetService(Service* _service) { service = _service; }
+	//스마트 포인터로 변환
+	void SetService(shared_ptr<Service> _service) { service = _service; }
 private:
-	//Connect 등록
 	bool RegisterConnect();
 	void RegisterRecv();
 	void RegisterSend(SendEvent* sendEvent);
+	bool RegisterDisconnect();
 private:
 	void ProcessConnect();
 	void ProcessRecv(int bytesTransferred);
 	void ProcessSend(SendEvent* sendEvent, int bytesTransferred);
+	//Disconnect 진행
+	void ProcessDisconnect();
 private:
 	void HandleError(int errorCode);
 public:
@@ -47,7 +52,6 @@ public:
 	virtual void OnSend(int len) {}
 	virtual void OnDisconnected() {}
 public:
-	//연결 호출 할 아이
 	bool Connect();
 	void Send(BYTE* buffer, int len);
 	void Disconnect(const WCHAR* cause);
