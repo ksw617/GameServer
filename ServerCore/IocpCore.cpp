@@ -29,8 +29,10 @@ bool IocpCore::ObserveIO(DWORD time)
     if (GetQueuedCompletionStatus(iocpHandle, &bytesTransferred, &key, (LPOVERLAPPED*)&iocpEvent, INFINITE))
     {
     
-        //AcceptEvent -> Listener
-        //RecvEvent -> Session               
+        //AcceptEvent -> Listener Server
+        //RecvEvent -> Session  Server & Client
+        //SendEvent -> Session   Server & Client
+        //ConnectEvent ->Session Client         
         IocpObj* iocpObj = iocpEvent->owner;
         iocpObj->ObserveIO(iocpEvent, bytesTransferred);
 

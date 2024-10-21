@@ -15,9 +15,13 @@ public:
     {
         printf("Recv : %s\n", buffer);
 
-        //고대로 보내기
         Send(buffer, len);
         return len; 
+    }
+
+    virtual void OnSend(int len) override
+    {
+        printf("OnSend Len : %d\n", len);
     }
 
     virtual void OnDisconnected() override

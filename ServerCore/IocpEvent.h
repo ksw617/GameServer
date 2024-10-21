@@ -30,6 +30,21 @@ public:
 	AcceptEvent() : IocpEvent(EventType::ACCEPT) {}
 };
 
+//ConnectEvent 추가
+class ConnectEvent : public IocpEvent
+{
+public:
+	ConnectEvent() : IocpEvent(EventType::CONNECT) {}
+};
+
+
+//DisconnectEvent 추가
+class DisconnectEvent : public IocpEvent
+{
+public:
+	DisconnectEvent() : IocpEvent(EventType::DISCONNECT) {}
+};
+
 
 class RecvEvent : public IocpEvent
 {
@@ -37,7 +52,6 @@ public:
 	RecvEvent() : IocpEvent(EventType::RECV) {}
 };
 
-//Send 추가
 class SendEvent : public IocpEvent
 {
 public:
