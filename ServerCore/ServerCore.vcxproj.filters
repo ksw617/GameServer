@@ -10,6 +10,9 @@
     <Filter Include="Network\Service">
       <UniqueIdentifier>{627ba15a-4e98-4a98-a4ce-32fa562f7650}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network\Buffer">
+      <UniqueIdentifier>{8687ca42-daf1-47f9-be94-f3fabeecaec3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -45,6 +48,12 @@
     <ClCompile Include="ClientService.cpp">
       <Filter>Network\Service</Filter>
     </ClCompile>
+    <ClCompile Include="RecvBuffer.cpp">
+      <Filter>Network\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="SendBuffer.cpp">
+      <Filter>Network\Buffer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -79,6 +88,12 @@
     </ClInclude>
     <ClInclude Include="ClientService.h">
       <Filter>Network\Service</Filter>
+    </ClInclude>
+    <ClInclude Include="RecvBuffer.h">
+      <Filter>Network\Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="SendBuffer.h">
+      <Filter>Network\Buffer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

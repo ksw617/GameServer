@@ -3,14 +3,13 @@
 #include "SocketHelper.h"
 #include "Service.h"
 
-Session::Session()
+Session::Session() : recvBuffer(BUFFER_SIZE) 
 {
 	socket = SocketHelper::CreateSocket();	
 }
 
 Session::~Session()
 {
-	printf("~Session\n");
 	SocketHelper::CloseSocket(socket);
 }
 
@@ -21,12 +20,12 @@ void Session::RegisterRecv()
 		return;
 		
 	recvEvent.Init();
-	//this -> shared_from_this()
 	recvEvent.owner = shared_from_this();
 
 	WSABUF wsaBuf;
-	wsaBuf.buf = (char*)recvBuffer;
-	wsaBuf.len = sizeof(recvBuffer);
+
+	wsaBuf.buf = (char*)recvBuffer.WritePos();
+	wsaBuf.len = recvBuffer.FreeSize();
 
 	DWORD recvLen = 0;
 	DWORD flags = 0;
@@ -43,6 +42,37 @@ void Session::RegisterRecv()
 	
 }
 
+void Session::ProcessRecv(int bytesTransferred)
+{
+	recvEvent.owner = nullptr;
+
+	if (bytesTransferred <= 0)
+	{
+		Disconnect(L"Recv 0 bytes");
+		return;
+	}
+
+	if (recvBuffer.OnWrite(bytesTransferred) == false)
+	{
+		Disconnect(L"On write overflow");
+		return;
+	}
+
+	uint32 dataSize = recvBuffer.DataSize();
+
+	uint32 processLen = OnRecv(recvBuffer.ReadPos(), bytesTransferred);
+	if (processLen < 0 || dataSize < processLen || recvBuffer.OnRead(processLen) == false)
+	{
+		Disconnect(L"On read overflow");
+		return;
+	}
+	
+
+	recvBuffer.Clear();
+
+	RegisterRecv();
+}
+
 bool Session::Connect()
 {
 	return RegisterConnect();
@@ -55,11 +85,13 @@ bool Session::RegisterConnect()
 	if (GetService()->GetServiceType() != ServiceType::CLIENT)
 		return false;	
 
+	if (!SocketHelper::SetReuseAddress(socket, true))
+		return false;
+
 	if (SocketHelper::BindAny(socket, 0) == false)
 		return false;
 
 	connectEvent.Init();
-	//this -> shared_from_this()
 	connectEvent.owner = shared_from_this();
 
 	DWORD bytesTransferred = 0;
@@ -86,36 +118,58 @@ void Session::ProcessConnect()
 
 	isConnected.store(true);
 
-	//this -> static_pointer_cast<Session>(shared_from_this())
-	GetService()->AddSession(static_pointer_cast<Session>(shared_from_this()));
+	GetService()->AddSession(GetSession());
 
 	OnConnected();
-
 	RegisterRecv();
 }
 
 
 
 
-void Session::Send(BYTE* buffer, int len)
+//수정
+void Session::Send(shared_ptr<Sendbuffer> sendBuffer)
 {
-	SendEvent* sendEvent = new SendEvent();
-	//this -> shared_from_this()
-	sendEvent->owner = shared_from_this();
-
-	sendEvent->sendBuffer.resize(len);
-
-	memcpy(sendEvent->sendBuffer.data(), buffer, len);
-
+	//Lock을 잡고
 	unique_lock<shared_mutex> lock(rwLock);
-	RegisterSend(sendEvent);
+
+	//sendQueue에 넣기만하고 끝냄
+	sendQueue.push(sendBuffer);
+
+	//내가 처음 Send를 호출하는 스레드 라면
+	if (sendRegistered.exchange(true) == false)
+	{
+
+		//등록을 내 스레드가
+		RegisterSend();
+
+	}
+
 }
 
 
-void Session::RegisterSend(SendEvent* sendEvent)
+void Session::RegisterSend()
 {
 	if (!IsConnected())
 		return;
+
+	//sendEvent 초기화
+	sendEvent.Init();
+	//sendEvent의 owner는 나의 session
+	sendEvent.owner = shared_from_this();
+
+	int writeSize = 0;
+	//sendQueue의 데이터가 남아 있지 않을 때까지 돌림
+	while (!sendQueue.empty())
+	{
+		//sendQueue의 앞부분부터 pop시키기 위해서 앞부분 데이터 캐싱
+		shared_ptr<Sendbuffer> sendBuffer = sendQueue.front();
+
+		writeSize += sendBuffer->WriteSize();
+
+	}
+
+	//내일 수정
 
 	WSABUF wsaBuf;
 	wsaBuf.buf = (char*)sendEvent->sendBuffer.data();
@@ -150,6 +204,7 @@ void Session::ObserveIO(IocpEvent* iocpEvent, DWORD byteTransferred)
 		break;
 	case EventType::SEND:
 		ProcessSend((SendEvent*)iocpEvent, byteTransferred);
+		break;
 	case EventType::DISCONNECT:	 
 		ProcessDisconnect();
 		break;
@@ -159,21 +214,7 @@ void Session::ObserveIO(IocpEvent* iocpEvent, DWORD byteTransferred)
 
 }
 
-void Session::ProcessRecv(int bytesTransferred)
-{
 
-	recvEvent.owner = nullptr;
-
-	if (bytesTransferred <= 0)
-	{
-		Disconnect(L"Recv 0 bytes");
-		return;
-	}
-
-	OnRecv(recvBuffer, bytesTransferred);
-
-	RegisterRecv();
-}
 
 void Session::ProcessSend(SendEvent* sendEvent, int bytesTransferred)
 {
@@ -196,17 +237,12 @@ void Session::Disconnect(const WCHAR* cause)
 
 	wprintf(L"Disconnect reason : %ls\n", cause);
 
-	OnDisconnected();
-	//this -> static_pointer_cast<Session>(shared_from_this())
-	GetService()->RemoveSession(static_pointer_cast<Session>(shared_from_this()));
-
 	RegisterDisconnect();
 }
 
 bool Session::RegisterDisconnect()
 {
 	disconnectEvent.Init();
-	//this -> shared_from_this()
 	disconnectEvent.owner = shared_from_this();
 
 	if (SocketHelper::DisconnectEx(socket, &disconnectEvent, TF_REUSE_SOCKET, 0))
@@ -230,8 +266,10 @@ bool Session::RegisterDisconnect()
 
 void Session::ProcessDisconnect()
 {
-	//disconnectEvent owner는 null로 밀고
 	disconnectEvent.owner = nullptr;
+
+	OnDisconnected();
+	GetService()->RemoveSession(GetSession());
 }
 
 void Session::HandleError(int errorCode)
@@ -240,7 +278,6 @@ void Session::HandleError(int errorCode)
 	{
 	case WSAECONNRESET:
 	case WSAECONNABORTED:
-		//에러일 경우에도 Disconnect
 		Disconnect(L"Handle Error");
 		break;
 	default:

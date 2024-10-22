@@ -9,6 +9,11 @@ char sendBuffer[] = "Hello this is Client";
 class ClientSession : public Session
 {
 public:
+    ~ClientSession()
+    {
+        printf("~ClientSession");
+    }
+public:
     virtual void OnConnected() override
     {
         printf("Connect to Server\n");
@@ -43,7 +48,7 @@ int main()
 
     printf("============== Client  ================\n");
     //Service* serverService = new ServerService(L"127.0.0.1", 27015, []() {return new ServerSession; });
-    shared_ptr<Service> clientService = make_shared<ClientService>(L"127.0.0.1", 27015, []() {return new ClientSession; });
+    shared_ptr<Service> clientService = make_shared<ClientService>(L"127.0.0.1", 27015, []() {return make_shared<ClientSession>(); });
 
     if (!clientService->Start())
     {

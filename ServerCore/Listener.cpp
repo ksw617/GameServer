@@ -12,7 +12,6 @@ Listener::~Listener()
     CloseSocket();
 }
 
-//스마트 포인터로 변환
 bool Listener::StartAccept(shared_ptr<ServerService> service)
 {
     serverService = service;
@@ -29,7 +28,6 @@ bool Listener::StartAccept(shared_ptr<ServerService> service)
         return false;
  
     ULONG_PTR key = 0;
-    //this ->  shared_from_this()
     service->GetIocpCore()->Register(shared_from_this());
 
     if (!SocketHelper::Bind(socket, service->GetSockAddr()))
@@ -40,7 +38,6 @@ bool Listener::StartAccept(shared_ptr<ServerService> service)
 
 
     AcceptEvent* acceptEvent = new AcceptEvent;
-    //this ->  shared_from_this()
     acceptEvent->owner = shared_from_this();
     RegisterAccept(acceptEvent);
 
@@ -49,15 +46,14 @@ bool Listener::StartAccept(shared_ptr<ServerService> service)
 
 void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 {
-    //스마트 포인터로 변환
     shared_ptr<Session> session = serverService->CreateSession();  
 
     acceptEvent->Init();
     acceptEvent->session = session;
 
     DWORD dwBytes = 0;
-               
-    if (!SocketHelper::AcceptEx(socket, session->GetSocket(), session->recvBuffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &dwBytes, (LPOVERLAPPED)acceptEvent))
+                                                              //WritePos 위치값 넘겨줌
+    if (!SocketHelper::AcceptEx(socket, session->GetSocket(), session->recvBuffer.WritePos(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &dwBytes, (LPOVERLAPPED)acceptEvent))
     {
         if (WSAGetLastError() != ERROR_IO_PENDING)
             RegisterAccept(acceptEvent);
@@ -66,7 +62,6 @@ void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 
 void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 {
-    //스마트 포인터로 변환
     shared_ptr<Session> session = acceptEvent->session;
 
     if (!SocketHelper::SetUpdateAcceptSocket(session->GetSocket(), socket))

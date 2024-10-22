@@ -10,7 +10,6 @@ enum class EventType : uint8
 
 };
 
-//전방선언
 class IocpObj;
 class Session;
 
@@ -18,9 +17,6 @@ class IocpEvent : public OVERLAPPED
 {
 public:
 	EventType eventType;
-	//shared_ptr<class IocpObj> owner;
-	//class IocpObj* owner = nullptr;
-	//스마트 포인터 사용
 	shared_ptr<IocpObj> owner;
 public:
 	IocpEvent(EventType type);
@@ -32,8 +28,6 @@ public:
 class AcceptEvent : public IocpEvent
 {
 public:
-	//class Session* session = nullptr;
-	//스마트 포인터 사용
 	shared_ptr<Session> session;
 public:
 	AcceptEvent() : IocpEvent(EventType::ACCEPT) {}
@@ -59,10 +53,15 @@ public:
 	RecvEvent() : IocpEvent(EventType::RECV) {}
 };
 
+//전방선언
+class Sendbuffer;
+
 class SendEvent : public IocpEvent
 {
 public:
-	vector<BYTE> sendBuffer;
+	//sendBuffer class로 변경
+	//vector<BYTE> sendBuffer;
+	vector<shared_ptr<Sendbuffer>> sendBuffers;
 public:
 	SendEvent() : IocpEvent(EventType::SEND) {}
 };
