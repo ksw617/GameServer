@@ -54,14 +54,14 @@ public:
 };
 
 //전방선언
-class Sendbuffer;
+class SendBuffer;
 
 class SendEvent : public IocpEvent
 {
 public:
 	//sendBuffer class로 변경
 	//vector<BYTE> sendBuffer;
-	vector<shared_ptr<Sendbuffer>> sendBuffers;
+	vector<shared_ptr<SendBuffer>> sendBuffers;
 public:
 	SendEvent() : IocpEvent(EventType::SEND) {}
 };

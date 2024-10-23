@@ -3,7 +3,8 @@
 
 SendBuffer::SendBuffer(int size)
 {
-    buffer.reserve(size);
+	//재할당
+    buffer.resize(size);
 }
 
 SendBuffer::~SendBuffer()
@@ -12,6 +13,8 @@ SendBuffer::~SendBuffer()
 
 bool SendBuffer::CopyData(void* data, int len)
 {
+	int size = buffer.size();
+
 	//복사할 데이터의 길이가 남은 용량보다 크다면
 	if (Capacity() < len)
 		return false;

@@ -4,7 +4,7 @@
 #include <Session.h>
 
 
-char sendBuffer[] = "Hello this is Client";
+char sendData[] = "Hello this is Client";
 
 class ClientSession : public Session
 {
@@ -18,7 +18,17 @@ public:
     {
         printf("Connect to Server\n");
 
-        Send((BYTE*)sendBuffer, sizeof(sendBuffer));
+        //sendBuffer 생성하면서 4096할당
+        shared_ptr<SendBuffer> sendBuffer = make_shared<SendBuffer>(4096);
+
+
+        //데이터 복사 하고
+        if (sendBuffer->CopyData(sendData, sizeof(sendData)))
+        {
+            //문제없음 데이터 보내기
+            Send(sendBuffer);
+        }
+
     }
 
     virtual int OnRecv(BYTE* buffer, int len) override
@@ -27,7 +37,16 @@ public:
 
         this_thread::sleep_for(1s);
 
-        Send(buffer, len);
+        //sendBuffer 생성하면서 4096할당
+        shared_ptr<SendBuffer> sendBuffer = make_shared<SendBuffer>(4096);
+
+        //데이터 복사 하고
+        if (sendBuffer->CopyData(buffer, len))
+        {
+            //문제없음 데이터 보내기
+            Send(sendBuffer);
+        }
+
         return len;
     }
 
@@ -47,8 +66,7 @@ int main()
     this_thread::sleep_for(1s);
 
     printf("============== Client  ================\n");
-    //Service* serverService = new ServerService(L"127.0.0.1", 27015, []() {return new ServerSession; });
-    shared_ptr<Service> clientService = make_shared<ClientService>(L"127.0.0.1", 27015, []() {return make_shared<ClientSession>(); });
+     shared_ptr<Service> clientService = make_shared<ClientService>(L"127.0.0.1", 27015, []() {return make_shared<ClientSession>(); });
 
     if (!clientService->Start())
     {
@@ -70,9 +88,6 @@ int main()
 
 
     t.join();
-
-    //delete clientService;
-
 
     return 0;
 }

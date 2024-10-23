@@ -20,7 +20,16 @@ public:
     {
         printf("Recv : %s\n", buffer);
 
-        Send(buffer, len);
+        //sendBuffer 생성하면서 4096할당
+        shared_ptr<SendBuffer> sendBuffer = make_shared<SendBuffer>(4096);
+        
+        //데이터 복사 하고
+        if (sendBuffer->CopyData(buffer, len))
+        {
+             //문제없음 데이터 보내기
+            Send(sendBuffer);
+        }
+        
         return len; 
     }
 
@@ -39,7 +48,6 @@ int main()
 {
     printf("============== Server  ================\n");
 
-    //Service* serverService = new ServerService(L"127.0.0.1", 27015, []() {return new ServerSession; });
     shared_ptr<Service> serverService = make_shared<ServerService>(L"127.0.0.1", 27015, []() {return make_shared<ServerSession>(); });
 
     thread t
@@ -56,9 +64,6 @@ int main()
     serverService->Start();
 
     t.join();
-
-   // delete serverService;
-
 
     return 0;
 }

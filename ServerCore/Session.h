@@ -23,7 +23,7 @@ private:
 	DisconnectEvent disconnectEvent;
 public:
 	//SendBuffer queue 추가
-	queue<shared_ptr<Sendbuffer>> sendQueue;
+	queue<shared_ptr<SendBuffer>> sendQueue;
 	//atomic으로 send를 등록했는지 안했는지
 	atomic <bool> sendRegistered = false;
 	RecvBuffer recvBuffer;
@@ -64,7 +64,7 @@ public:
 	bool Connect();
 	//SendBuffer로 수정
 	//void Send(BYTE* buffer, int len);
-	void Send(shared_ptr<Sendbuffer> sendBuffer);
+	void Send(shared_ptr<SendBuffer> sendBuffer);
 	void Disconnect(const WCHAR* cause);
 public:
 	void ObserveIO(IocpEvent* iocpEvent, DWORD byteTransferred) override;
