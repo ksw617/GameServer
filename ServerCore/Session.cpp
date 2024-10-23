@@ -122,7 +122,7 @@ void Session::ProcessConnect()
 
 	OnConnected();
 	RegisterRecv();
-}
+}											
 
 
 
