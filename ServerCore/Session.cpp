@@ -318,8 +318,6 @@ bool Session::RegisterDisconnect()
 }
 
 
-
-
 void Session::ProcessDisconnect()
 {
 	disconnectEvent.owner = nullptr;

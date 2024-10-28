@@ -1,7 +1,7 @@
 #pragma once
 #include "IocpObj.h"
 #include "RecvBuffer.h"
-#include "SendBuffer.h" //추가
+#include "SendBuffer.h"
 
 class Service;
 
@@ -17,14 +17,11 @@ private:
 	SOCKADDR_IN sockAddr = {};
 private:
 	ConnectEvent connectEvent;
-	//SendEvent 추가
 	SendEvent sendEvent;
 	RecvEvent recvEvent;
 	DisconnectEvent disconnectEvent;
 public:
-	//SendBuffer queue 추가
 	queue<shared_ptr<SendBuffer>> sendQueue;
-	//atomic으로 send를 등록했는지 안했는지
 	atomic <bool> sendRegistered = false;
 	RecvBuffer recvBuffer;
 public:
@@ -44,13 +41,11 @@ public:
 private:
 	bool RegisterConnect();
 	void RegisterRecv();
-	//SendEvent들구 있을꺼라
 	void RegisterSend();
 	bool RegisterDisconnect();
 private:
 	void ProcessConnect();
 	void ProcessRecv(int bytesTransferred);
-	//SendEvent들구 있을꺼라
 	void ProcessSend(int bytesTransferred);
 	void ProcessDisconnect();
 private:
@@ -62,8 +57,6 @@ public:
 	virtual void OnDisconnected() {}
 public:
 	bool Connect();
-	//SendBuffer로 수정
-	//void Send(BYTE* buffer, int len);
 	void Send(shared_ptr<SendBuffer> sendBuffer);
 	void Disconnect(const WCHAR* cause);
 public:

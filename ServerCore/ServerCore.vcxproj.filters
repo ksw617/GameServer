@@ -13,6 +13,15 @@
     <Filter Include="Network\Buffer">
       <UniqueIdentifier>{8687ca42-daf1-47f9-be94-f3fabeecaec3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network\IocpObj">
+      <UniqueIdentifier>{efe1ac38-b27b-43ec-bba1-9f899a49dcc6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Network\IocpObj\Session">
+      <UniqueIdentifier>{35bbdad0-e94a-438b-8bb1-e9e6b257a93d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Network\IocpObj\Listener">
+      <UniqueIdentifier>{2edbf35a-4219-46c0-babb-19c6db51a6a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -21,22 +30,13 @@
     <ClCompile Include="CorePch.cpp">
       <Filter>PCH</Filter>
     </ClCompile>
-    <ClCompile Include="Listener.cpp">
-      <Filter>Network</Filter>
-    </ClCompile>
     <ClCompile Include="SocketHelper.cpp">
       <Filter>Network</Filter>
     </ClCompile>
     <ClCompile Include="IocpCore.cpp">
       <Filter>Network</Filter>
     </ClCompile>
-    <ClCompile Include="Session.cpp">
-      <Filter>Network</Filter>
-    </ClCompile>
     <ClCompile Include="IocpEvent.cpp">
-      <Filter>Network</Filter>
-    </ClCompile>
-    <ClCompile Include="IocpObj.cpp">
       <Filter>Network</Filter>
     </ClCompile>
     <ClCompile Include="Service.cpp">
@@ -60,6 +60,18 @@
     <ClCompile Include="SendBufferChunk.cpp">
       <Filter>Network\Buffer</Filter>
     </ClCompile>
+    <ClCompile Include="Session.cpp">
+      <Filter>Network\IocpObj\Session</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketSession.cpp">
+      <Filter>Network\IocpObj\Session</Filter>
+    </ClCompile>
+    <ClCompile Include="IocpObj.cpp">
+      <Filter>Network\IocpObj</Filter>
+    </ClCompile>
+    <ClCompile Include="Listener.cpp">
+      <Filter>Network\IocpObj\Listener</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -68,22 +80,13 @@
     <ClInclude Include="CorePch.h">
       <Filter>PCH</Filter>
     </ClInclude>
-    <ClInclude Include="Listener.h">
-      <Filter>Network</Filter>
-    </ClInclude>
     <ClInclude Include="SocketHelper.h">
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="IocpCore.h">
       <Filter>Network</Filter>
     </ClInclude>
-    <ClInclude Include="Session.h">
-      <Filter>Network</Filter>
-    </ClInclude>
     <ClInclude Include="IocpEvent.h">
-      <Filter>Network</Filter>
-    </ClInclude>
-    <ClInclude Include="IocpObj.h">
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="Service.h">
@@ -106,6 +109,18 @@
     </ClInclude>
     <ClInclude Include="SendBufferChunk.h">
       <Filter>Network\Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Network\IocpObj\Session</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketSession.h">
+      <Filter>Network\IocpObj\Session</Filter>
+    </ClInclude>
+    <ClInclude Include="IocpObj.h">
+      <Filter>Network\IocpObj</Filter>
+    </ClInclude>
+    <ClInclude Include="Listener.h">
+      <Filter>Network\IocpObj\Listener</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

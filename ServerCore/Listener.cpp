@@ -10,6 +10,13 @@
 Listener::~Listener()
 {
     CloseSocket();
+
+    //Listener ¼Ò¸êµÉ¶§ AcceptEventµµ ¼Ò¸ê ½ÃÄÑÁÜ
+    for (auto acceptEvent : accentEvents)
+    {
+        delete(acceptEvent);
+
+    }
 }
 
 bool Listener::StartAccept(shared_ptr<ServerService> service)
@@ -36,10 +43,20 @@ bool Listener::StartAccept(shared_ptr<ServerService> service)
     if (!SocketHelper::Listen(socket))
         return false;
 
+    //AcceptEvent °¹¼ö
+    const int acceptEventCount = 3;
 
-    AcceptEvent* acceptEvent = new AcceptEvent;
-    acceptEvent->owner = shared_from_this();
-    RegisterAccept(acceptEvent);
+    for (int i = 0; i < acceptEventCount; i++)
+    {
+        AcceptEvent* acceptEvent = new AcceptEvent;
+        acceptEvent->owner = shared_from_this();
+
+        //accentEvent¸¦ °ü¸® ÇÏ±âÀ§ÇØ
+        accentEvents.push_back(acceptEvent);
+        RegisterAccept(acceptEvent);
+    }
+
+
 
     return true;
 }
@@ -71,7 +88,6 @@ void Listener::ProcessAccept(AcceptEvent* acceptEvent)
         return;
     }
 
-    printf("ProcessAccept\n");
 
     SOCKADDR_IN sockAddr;
     int sockAddrSize = sizeof(sockAddr); 

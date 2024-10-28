@@ -16,4 +16,6 @@ public:
 public:
 	void Init();
 	shared_ptr<class SendBuffer> Open(int size);
+	//다쓰고 얼마 썻는지 알려 주기
+	void Close(int size);
 };

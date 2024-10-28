@@ -1,12 +1,13 @@
 #pragma once
 #include "pch.h"
 #include <ClientService.h>
-#include <Session.h>
+#include <PacketSession.h>     //PacketSession
+#include <SendBufferManager.h>
 
 
 char sendData[] = "Hello this is Client";
 
-class ClientSession : public Session
+class ClientSession : public PacketSession
 {
 public:
     ~ClientSession()
@@ -16,34 +17,41 @@ public:
 public:
     virtual void OnConnected() override
     {
-        printf("Connect to Server\n");
 
-        //sendBuffer 생성하면서 4096할당
-        shared_ptr<SendBuffer> sendBuffer = make_shared<SendBuffer>(4096);
+        shared_ptr<SendBuffer> sendBuffer = SendBufferManager::Get().Open(4096);
 
+        //주소 받아오기
+        BYTE* data = sendBuffer->GetBuffer();
 
-        //데이터 복사 하고
-        if (sendBuffer->CopyData(sendData, sizeof(sendData)))
+        //     25    =             4        +    21
+        int sendSize = sizeof(PacketHeader) + sizeof(sendData);
+
+        //[2byte : size] = 25
+        ((PacketHeader*)data)->size = sendSize;
+        //[size][2byte : id] = 0
+        ((PacketHeader*)data)->id = 0;
+
+        //[size][id][....여기 채우면 됨]   <- 21바이트 복사해서 채우기
+        memcpy(&data[4], sendData, sizeof(sendData));
+
+        //토탈 25바이트 사용한거니까
+        if (sendBuffer->Close(sendSize))
         {
-            //문제없음 데이터 보내기
             Send(sendBuffer);
         }
 
     }
 
-    virtual int OnRecv(BYTE* buffer, int len) override
+    virtual int OnRecvPacket(BYTE* buffer, int len) override
     {
-        printf("Recv : %s\n", (char*)buffer);
 
         this_thread::sleep_for(1s);
+        shared_ptr<SendBuffer> sendBuffer = SendBufferManager::Get().Open(4096);
 
-        //sendBuffer 생성하면서 4096할당
-        shared_ptr<SendBuffer> sendBuffer = make_shared<SendBuffer>(4096);
+        memcpy(sendBuffer->GetBuffer(), buffer, len);
 
-        //데이터 복사 하고
-        if (sendBuffer->CopyData(buffer, len))
+        if (sendBuffer->Close(len))
         {
-            //문제없음 데이터 보내기
             Send(sendBuffer);
         }
 
@@ -68,12 +76,16 @@ int main()
     printf("============== Client  ================\n");
      shared_ptr<Service> clientService = make_shared<ClientService>(L"127.0.0.1", 27015, []() {return make_shared<ClientSession>(); });
 
-    if (!clientService->Start())
-    {
-        printf("Can not Start\n");
-        return 1;
+     //1000명 정도 접속 시작
+     for (int i = 0; i < 1; i++)
+     {
+         if (!clientService->Start())
+         {
+             printf("Can not Start\n");
+             return 1;
 
-    }
+         }
+     }
 
     thread t
     (
