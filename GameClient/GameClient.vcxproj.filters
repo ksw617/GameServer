@@ -8,6 +8,9 @@
     <Filter Include="PCH">
       <UniqueIdentifier>{d192815a-2830-4e0b-a2f8-57710c084b0d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Session">
+      <UniqueIdentifier>{89310ba8-2be0-4bd6-8af6-683156a41f0f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameClient.cpp">
@@ -16,10 +19,16 @@
     <ClCompile Include="pch.cpp">
       <Filter>PCH</Filter>
     </ClCompile>
+    <ClCompile Include="ServerSession.cpp">
+      <Filter>Session</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>PCH</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerSession.h">
+      <Filter>Session</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
