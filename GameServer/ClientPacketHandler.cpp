@@ -5,12 +5,7 @@ ClientPacketHandler::PacketFunc ClientPacketHandler::packetHandlers[UINT16_MAX];
 
 void ClientPacketHandler::Init()
 {
-	//[0] -> Handle_INVALID();
-	//[1] -> Handle_INVALID();
-	//[2] -> Handle_INVALID();
-	//.
-	//.
-	//.
+
 	for (int i = 0; i < UINT16_MAX; i++)
 	{
 		packetHandlers[i] = Handle_INVALID;

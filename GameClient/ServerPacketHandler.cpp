@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "ServerPacketHandler.h"
 
+ServerPacketHandler::PacketFunc ServerPacketHandler::packetHandlers[UINT16_MAX];
+
 void ServerPacketHandler::Init()
 {
 	for (int i = 0; i < UINT16_MAX; i++)
@@ -12,7 +14,7 @@ void ServerPacketHandler::Init()
 	//C_LOGIN == 1001 == ID
 	packetHandlers[S_LOGIN] = [](shared_ptr<PacketSession>& session, BYTE* buffer, int len)
 		{
-			return HandlePacket<Protocol::C_LOGIN>(Handle_S_LOGIN, session, buffer, len);
+			return HandlePacket<Protocol::S_LOGIN>(Handle_S_LOGIN, session, buffer, len);
 
 		};
 }

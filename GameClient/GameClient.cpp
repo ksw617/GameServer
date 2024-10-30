@@ -4,9 +4,13 @@
 
 #include "ServerSession.h"
 
+#include "ServerPacketHandler.h"
 
 int main()
 {
+    ServerPacketHandler::Init();
+
+
     this_thread::sleep_for(1s);
 
     printf("============== Client  ================\n");
