@@ -11,6 +11,9 @@
     <Filter Include="Session">
       <UniqueIdentifier>{89310ba8-2be0-4bd6-8af6-683156a41f0f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Protobuf">
+      <UniqueIdentifier>{8d84b33d-5347-4a5c-a6d4-9769ff77a0b9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameClient.cpp">
@@ -22,6 +25,9 @@
     <ClCompile Include="ServerSession.cpp">
       <Filter>Session</Filter>
     </ClCompile>
+    <ClCompile Include="Protocol.pb.cc">
+      <Filter>Protobuf</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -29,6 +35,9 @@
     </ClInclude>
     <ClInclude Include="ServerSession.h">
       <Filter>Session</Filter>
+    </ClInclude>
+    <ClInclude Include="Protocol.pb.h">
+      <Filter>Protobuf</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
