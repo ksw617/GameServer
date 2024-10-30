@@ -2,6 +2,8 @@
 #include "ClientSession.h"
 #include "SessionManager.h"
 
+#include "ClientPacketHandler.h"
+
 void ClientSession::OnConnected()
 {
     SessionManager::Get().Add(GetClientSession());
@@ -9,6 +11,9 @@ void ClientSession::OnConnected()
 
 int ClientSession::OnRecvPacket(BYTE* buffer, int len)
 {
+    shared_ptr<PacketSession> session = GetPacketSession();
+    ClientPacketHandler::HandlePacket(session, buffer, len);
+
     return len;
 }
 

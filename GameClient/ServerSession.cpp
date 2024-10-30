@@ -2,19 +2,20 @@
 #include "ServerSession.h"
 
 #include "Protocol.pb.h"
+#include "ServerPacketHandler.h"
 
 void ServerSession::OnConnected()
 {
-
+    Protocol::C_LOGIN packet;
+    auto sendBuffer = ServerPacketHandler::MakeSendBuffer(packet);
+    Send(sendBuffer);
+    
 }
 
 int ServerSession::OnRecvPacket(BYTE* buffer, int len)
 {
-    Protocol::TEST packet;
-    //&buffer[4], 실제 길이에서 - 4
-    packet.ParseFromArray(buffer + sizeof(PacketHeader), len - sizeof(PacketHeader));
-
-    printf("ID : %d, HP : %d, MP : %d\n", packet.id(), packet.hp(), packet.mp());
+    shared_ptr<PacketSession> session = GetPacketSession();
+    ServerPacketHandler::HandlePacket(session, buffer, len);
 
     return len;
 }

@@ -1,13 +1,14 @@
 #pragma once
 #include "pch.h"
 #include <ServerService.h>
+#include <SendBufferManager.h>
 
 #include "ClientSession.h"
 #include "SessionManager.h"
 
-#include <SendBufferManager.h>
-
 #include "Protocol.pb.h" // include
+
+#include "ClientPacketHandler.h"
 
 #define THREAD_COUNT 5
 
@@ -43,39 +44,7 @@ int main()
     }
    
 
-    while (true)
-    {
-        
-        Protocol::TEST packet;
-        packet.set_id(1);
-        packet.set_hp(2);
-        packet.set_mp(3);
-
-        uint16 dataSize = (uint16)packet.ByteSizeLong();
-        uint16 packetSize = dataSize + sizeof(PacketHeader);   //dataSize + 4byte
-
-
-
-        shared_ptr<SendBuffer> sendBuffer = SendBufferManager::Get().Open(4096);
-        BYTE* buffer = sendBuffer->GetBuffer();
-
-        ((PacketHeader*)buffer)->size = packetSize;
-        ((PacketHeader*)buffer)->id = 0;
-
-        //บนป็
-        packet.SerializePartialToArray(&buffer[4], dataSize);
-
-     
-        if (sendBuffer->Close(packetSize))
-        {
-
-            SessionManager::Get().Broadcast(sendBuffer);
-
-        }
-
-        this_thread::sleep_for(250ms);
-
-    }
+  
 
 
     for (int i = 0; i < THREAD_COUNT; i++)
