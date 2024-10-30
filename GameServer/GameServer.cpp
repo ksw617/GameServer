@@ -7,6 +7,8 @@
 
 #include <SendBufferManager.h>
 
+#include "Protocol.pb.h" // include
+
 #define THREAD_COUNT 5
 
 int main()
@@ -41,28 +43,36 @@ int main()
     }
    
 
-    BYTE sendData[996] = "Hello world";
-
-    //메인 스레드에서 접속한 애들한테 메세지 보내기
     while (true)
     {
-        shared_ptr<SendBuffer> sendBuffer = SendBufferManager::Get().Open(4096);
+        
+        Protocol::TEST packet;
+        packet.set_id(1);
+        packet.set_hp(2);
+        packet.set_mp(3);
 
+        uint16 dataSize = (uint16)packet.ByteSizeLong();
+        uint16 packetSize = dataSize + sizeof(PacketHeader);   //dataSize + 4byte
+
+
+
+        shared_ptr<SendBuffer> sendBuffer = SendBufferManager::Get().Open(4096);
         BYTE* buffer = sendBuffer->GetBuffer();
 
-        int sendSize = sizeof(PacketHeader) + sizeof(sendData);
-        ((PacketHeader*)buffer)->size = sendSize;
+        ((PacketHeader*)buffer)->size = packetSize;
         ((PacketHeader*)buffer)->id = 0;
-        memcpy(&buffer[4], sendData, sizeof(sendData));
-        if (sendBuffer->Close(sendSize))
+
+        //복사
+        packet.SerializePartialToArray(&buffer[4], dataSize);
+
+     
+        if (sendBuffer->Close(packetSize))
         {
 
-            //접속한 애들 전체 다 보내기
             SessionManager::Get().Broadcast(sendBuffer);
 
         }
 
-        //1초에 4번정도 전체 메세지
         this_thread::sleep_for(250ms);
 
     }
