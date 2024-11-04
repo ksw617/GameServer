@@ -72,6 +72,9 @@
     <ClCompile Include="Listener.cpp">
       <Filter>Network\IocpObj\Listener</Filter>
     </ClCompile>
+    <ClCompile Include="PacketHandler.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -121,6 +124,9 @@
     </ClInclude>
     <ClInclude Include="Listener.h">
       <Filter>Network\IocpObj\Listener</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketHandler.h">
+      <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

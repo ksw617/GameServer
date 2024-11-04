@@ -1,8 +1,38 @@
 syntax = "proto3";
 package Protocol;
 
+import "Struct.proto";
+
 message C_LOGIN
-{}
+{
+
+}
 
 message S_LOGIN
-{}
+{
+	bool success = 1;
+	uint64 playerID = 2;
+}
+
+message C_ENTER_GAME
+{
+	Player player = 1;
+}
+
+message S_ENTER_GAME
+{
+	bool success = 1;
+	repeated Player players = 2;
+}
+
+message C_CHAT
+{
+	string msg = 1;
+}
+
+message S_CHAT
+{
+	uint64 playerID = 1;
+	string msg = 2;
+}
+

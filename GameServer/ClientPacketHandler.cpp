@@ -1,31 +1,19 @@
 #include "pch.h"
 #include "ClientPacketHandler.h"
-
-ClientPacketHandler::PacketFunc ClientPacketHandler::packetHandlers[UINT16_MAX];
+#include "GameRoom.h"
+#include "Player.h"
 
 void ClientPacketHandler::Init()
 {
+	PacketHandler::Init();
 
-	for (int i = 0; i < UINT16_MAX; i++)
-	{
-		packetHandlers[i] = Handle_INVALID;
-
-	}
-
-	//C_LOGIN == 1001 == ID
 	packetHandlers[C_LOGIN] = [](shared_ptr<PacketSession>& session, BYTE* buffer, int len)
-		{
-			return HandlePacket<Protocol::C_LOGIN>(Handle_C_LOGIN, session, buffer, len);
+		{ return HandlePacket<Protocol::C_LOGIN>(Handle_C_LOGIN, session, buffer, len);	};
+	packetHandlers[C_ENTER_GAME] = [](shared_ptr<PacketSession>& session, BYTE* buffer, int len)
+		{ return HandlePacket<Protocol::C_ENTER_GAME>(Handle_C_ENTER_GAME, session, buffer, len); };
+	packetHandlers[C_CHAT] = [](shared_ptr<PacketSession>& session, BYTE* buffer, int len)
+		{ return HandlePacket<Protocol::C_CHAT>(Handle_C_CHAT, session, buffer, len);	};
 
-		};
-
-}
-
-bool ClientPacketHandler::HandlePacket(shared_ptr<PacketSession>& session, BYTE* buffer, int len)
-{
-	PacketHeader* header = (PacketHeader*)buffer;
-
-	return packetHandlers[header->id](session, buffer, len);
 }
 
 bool Handle_INVALID(shared_ptr<PacketSession>& session, BYTE* buffer, int len)
@@ -38,6 +26,34 @@ bool Handle_C_LOGIN(shared_ptr<PacketSession>& session, Protocol::C_LOGIN& packe
 {
 	printf("Client Login\n");
 
+	Protocol::S_LOGIN sendPacket;
 	//Todo
+	sendPacket.set_success(true);
+	int id = GameRoom::Get().GetID();
+	sendPacket.set_playerid(id);
+
+	auto sendBuffer = ClientPacketHandler::MakeSendBuffer(sendPacket);
+	session->Send(sendBuffer);
+
 	return true;
+}
+
+bool Handle_C_ENTER_GAME(shared_ptr<PacketSession>& session, Protocol::C_ENTER_GAME& packet)
+{
+	printf("Client Enter Game\n");
+
+	shared_ptr<Player> player = make_shared<Player>();
+	auto& p = packet.player();
+	player->id = p.id();
+	player->name = p.name().c_str();
+	player->session = static_pointer_cast<ClientSession>(session);
+
+	GameRoom::Get().Enter(player);
+
+	return true;
+}
+
+bool Handle_C_CHAT(shared_ptr<PacketSession>& session, Protocol::C_CHAT& packet)
+{
+	return false;
 }
