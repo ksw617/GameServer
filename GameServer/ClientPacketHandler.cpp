@@ -48,12 +48,28 @@ bool Handle_C_ENTER_GAME(shared_ptr<PacketSession>& session, Protocol::C_ENTER_G
 	player->name = p.name().c_str();
 	player->session = static_pointer_cast<ClientSession>(session);
 
-	GameRoom::Get().Enter(player);
+	{
+		Protocol::S_JOIN_GAME sendPacket;
 
+		Protocol::Player* joinPlayer = new Protocol::Player;
+		joinPlayer->set_id(p.id());
+		joinPlayer->set_name(p.name());
+
+		sendPacket.set_allocated_player(joinPlayer);
+		auto sendBuffer = ClientPacketHandler::MakeSendBuffer(sendPacket);
+
+		GameRoom::Get().Broadcast(sendBuffer);
+
+		GameRoom::Get().Enter(player);
+
+	}
 	return true;
 }
 
 bool Handle_C_CHAT(shared_ptr<PacketSession>& session, Protocol::C_CHAT& packet)
 {
+	
+	printf("C_CHAT : ");
+	printf("%s\n", packet.msg().c_str());
 	return false;
 }

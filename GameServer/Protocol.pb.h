@@ -62,6 +62,9 @@ extern S_CHATDefaultTypeInternal _S_CHAT_default_instance_;
 class S_ENTER_GAME;
 struct S_ENTER_GAMEDefaultTypeInternal;
 extern S_ENTER_GAMEDefaultTypeInternal _S_ENTER_GAME_default_instance_;
+class S_JOIN_GAME;
+struct S_JOIN_GAMEDefaultTypeInternal;
+extern S_JOIN_GAMEDefaultTypeInternal _S_JOIN_GAME_default_instance_;
 class S_LOGIN;
 struct S_LOGINDefaultTypeInternal;
 extern S_LOGINDefaultTypeInternal _S_LOGIN_default_instance_;
@@ -72,6 +75,7 @@ template<> ::Protocol::C_ENTER_GAME* Arena::CreateMaybeMessage<::Protocol::C_ENT
 template<> ::Protocol::C_LOGIN* Arena::CreateMaybeMessage<::Protocol::C_LOGIN>(Arena*);
 template<> ::Protocol::S_CHAT* Arena::CreateMaybeMessage<::Protocol::S_CHAT>(Arena*);
 template<> ::Protocol::S_ENTER_GAME* Arena::CreateMaybeMessage<::Protocol::S_ENTER_GAME>(Arena*);
+template<> ::Protocol::S_JOIN_GAME* Arena::CreateMaybeMessage<::Protocol::S_JOIN_GAME>(Arena*);
 template<> ::Protocol::S_LOGIN* Arena::CreateMaybeMessage<::Protocol::S_LOGIN>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace Protocol {
@@ -680,6 +684,163 @@ class S_ENTER_GAME final :
 };
 // -------------------------------------------------------------------
 
+class S_JOIN_GAME final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Protocol.S_JOIN_GAME) */ {
+ public:
+  inline S_JOIN_GAME() : S_JOIN_GAME(nullptr) {}
+  ~S_JOIN_GAME() override;
+  explicit PROTOBUF_CONSTEXPR S_JOIN_GAME(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  S_JOIN_GAME(const S_JOIN_GAME& from);
+  S_JOIN_GAME(S_JOIN_GAME&& from) noexcept
+    : S_JOIN_GAME() {
+    *this = ::std::move(from);
+  }
+
+  inline S_JOIN_GAME& operator=(const S_JOIN_GAME& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline S_JOIN_GAME& operator=(S_JOIN_GAME&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const S_JOIN_GAME& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const S_JOIN_GAME* internal_default_instance() {
+    return reinterpret_cast<const S_JOIN_GAME*>(
+               &_S_JOIN_GAME_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    4;
+
+  friend void swap(S_JOIN_GAME& a, S_JOIN_GAME& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(S_JOIN_GAME* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(S_JOIN_GAME* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  S_JOIN_GAME* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<S_JOIN_GAME>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const S_JOIN_GAME& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const S_JOIN_GAME& from) {
+    S_JOIN_GAME::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(S_JOIN_GAME* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Protocol.S_JOIN_GAME";
+  }
+  protected:
+  explicit S_JOIN_GAME(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kPlayerFieldNumber = 1,
+  };
+  // .Protocol.Player player = 1;
+  bool has_player() const;
+  private:
+  bool _internal_has_player() const;
+  public:
+  void clear_player();
+  const ::Protocol::Player& player() const;
+  PROTOBUF_NODISCARD ::Protocol::Player* release_player();
+  ::Protocol::Player* mutable_player();
+  void set_allocated_player(::Protocol::Player* player);
+  private:
+  const ::Protocol::Player& _internal_player() const;
+  ::Protocol::Player* _internal_mutable_player();
+  public:
+  void unsafe_arena_set_allocated_player(
+      ::Protocol::Player* player);
+  ::Protocol::Player* unsafe_arena_release_player();
+
+  // @@protoc_insertion_point(class_scope:Protocol.S_JOIN_GAME)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::Protocol::Player* player_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Protocol_2eproto;
+};
+// -------------------------------------------------------------------
+
 class C_CHAT final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Protocol.C_CHAT) */ {
  public:
@@ -728,7 +889,7 @@ class C_CHAT final :
                &_C_CHAT_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    5;
 
   friend void swap(C_CHAT& a, C_CHAT& b) {
     a.Swap(&b);
@@ -881,7 +1042,7 @@ class S_CHAT final :
                &_S_CHAT_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    6;
 
   friend void swap(S_CHAT& a, S_CHAT& b) {
     a.Swap(&b);
@@ -1202,6 +1363,95 @@ S_ENTER_GAME::players() const {
 
 // -------------------------------------------------------------------
 
+// S_JOIN_GAME
+
+// .Protocol.Player player = 1;
+inline bool S_JOIN_GAME::_internal_has_player() const {
+  return this != internal_default_instance() && _impl_.player_ != nullptr;
+}
+inline bool S_JOIN_GAME::has_player() const {
+  return _internal_has_player();
+}
+inline const ::Protocol::Player& S_JOIN_GAME::_internal_player() const {
+  const ::Protocol::Player* p = _impl_.player_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Protocol::Player&>(
+      ::Protocol::_Player_default_instance_);
+}
+inline const ::Protocol::Player& S_JOIN_GAME::player() const {
+  // @@protoc_insertion_point(field_get:Protocol.S_JOIN_GAME.player)
+  return _internal_player();
+}
+inline void S_JOIN_GAME::unsafe_arena_set_allocated_player(
+    ::Protocol::Player* player) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.player_);
+  }
+  _impl_.player_ = player;
+  if (player) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Protocol.S_JOIN_GAME.player)
+}
+inline ::Protocol::Player* S_JOIN_GAME::release_player() {
+  
+  ::Protocol::Player* temp = _impl_.player_;
+  _impl_.player_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::Protocol::Player* S_JOIN_GAME::unsafe_arena_release_player() {
+  // @@protoc_insertion_point(field_release:Protocol.S_JOIN_GAME.player)
+  
+  ::Protocol::Player* temp = _impl_.player_;
+  _impl_.player_ = nullptr;
+  return temp;
+}
+inline ::Protocol::Player* S_JOIN_GAME::_internal_mutable_player() {
+  
+  if (_impl_.player_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Protocol::Player>(GetArenaForAllocation());
+    _impl_.player_ = p;
+  }
+  return _impl_.player_;
+}
+inline ::Protocol::Player* S_JOIN_GAME::mutable_player() {
+  ::Protocol::Player* _msg = _internal_mutable_player();
+  // @@protoc_insertion_point(field_mutable:Protocol.S_JOIN_GAME.player)
+  return _msg;
+}
+inline void S_JOIN_GAME::set_allocated_player(::Protocol::Player* player) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.player_);
+  }
+  if (player) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(
+                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(player));
+    if (message_arena != submessage_arena) {
+      player = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, player, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.player_ = player;
+  // @@protoc_insertion_point(field_set_allocated:Protocol.S_JOIN_GAME.player)
+}
+
+// -------------------------------------------------------------------
+
 // C_CHAT
 
 // string msg = 1;
@@ -1331,6 +1581,8 @@ inline void S_CHAT::set_allocated_msg(std::string* msg) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

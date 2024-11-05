@@ -25,6 +25,11 @@ message S_ENTER_GAME
 	repeated Player players = 2;
 }
 
+message S_JOIN_GAME
+{
+	Player player = 1;
+}
+
 message C_CHAT
 {
 	string msg = 1;

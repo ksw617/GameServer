@@ -4,12 +4,13 @@
       
 enum : uint16
 {
-	C_LOGIN = 1001,
-	S_LOGIN = 1002,
+    C_LOGIN = 1001,
+    S_LOGIN = 1002,
     C_ENTER_GAME = 1003,
     S_ENTER_GAME = 1004,
     C_CHAT = 1005,
     S_CHAT = 1006,
+    S_JOIN_GAME = 1007,
 };
 
 //Recv 함수 정의
@@ -31,5 +32,6 @@ public:
     static shared_ptr<SendBuffer> MakeSendBuffer(Protocol::S_LOGIN& packet) { return PacketHandler::MakeSendBuffer(packet, S_LOGIN); }
     static shared_ptr<SendBuffer> MakeSendBuffer(Protocol::S_ENTER_GAME& packet) { return PacketHandler::MakeSendBuffer(packet, S_ENTER_GAME); }
     static shared_ptr<SendBuffer> MakeSendBuffer(Protocol::S_CHAT& packet) { return PacketHandler::MakeSendBuffer(packet, S_CHAT); }
+    static shared_ptr<SendBuffer> MakeSendBuffer(Protocol::S_JOIN_GAME& packet) { return PacketHandler::MakeSendBuffer(packet, S_JOIN_GAME); }
 };
 

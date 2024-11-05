@@ -10,11 +10,13 @@ enum : uint16
     S_ENTER_GAME = 1004,
     C_CHAT = 1005,
     S_CHAT = 1006,
+    S_JOIN_GAME = 1007,
 };
 
 bool Handle_S_LOGIN(shared_ptr<PacketSession>& session, Protocol::S_LOGIN& packet);
 bool Handle_S_ENTER_GAME(shared_ptr<PacketSession>& session, Protocol::S_ENTER_GAME& packet);
 bool Handle_S_CHAT(shared_ptr<PacketSession>& session, Protocol::S_CHAT& packet);
+bool Handle_S_JOIN_GAME(shared_ptr<PacketSession>& session, Protocol::S_JOIN_GAME& packet);
 
 
 class ServerPacketHandler : public PacketHandler

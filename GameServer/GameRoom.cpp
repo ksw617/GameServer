@@ -2,11 +2,32 @@
 #include "GameRoom.h"
 #include "Player.h"
 
+#include "Protocol.pb.h"
+#include "ClientPacketHandler.h"
+
 void GameRoom::Enter(shared_ptr<Player> player)
 {
-	unique_lock<shared_mutex> lock(rwLock);
-	players.insert(player);
-	printf("Player ID [%u] 입장\n", player->id);
+	shared_ptr<Session> session = player->session.lock();
+	if (session != nullptr)
+	{
+		unique_lock<shared_mutex> lock(rwLock);
+		players.insert(player);
+		printf("Player ID [%u] 입장\n", player->id);
+
+
+		Protocol::S_ENTER_GAME sendPacket;
+		for (const auto& p : players)
+		{
+			Protocol::Player* player = sendPacket.add_players();
+			player->set_id(p->id);
+			player->set_name(p->name);
+		}
+
+		sendPacket.set_success(true);
+
+		auto sendBuffer = ClientPacketHandler::MakeSendBuffer(sendPacket);
+		session->Send(sendBuffer);
+	}
 
 }
 

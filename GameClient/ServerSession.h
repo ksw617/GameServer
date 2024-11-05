@@ -4,7 +4,7 @@
 class ServerSession : public PacketSession
 {
 public:
-	~ServerSession() {  }
+	~ServerSession() { printf("~ServerSession\n"); }
 public:
 	virtual void OnConnected() override;
 	virtual int OnRecvPacket(BYTE* buffer, int len) override;
