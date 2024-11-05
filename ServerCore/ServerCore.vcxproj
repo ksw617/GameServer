@@ -168,6 +168,9 @@
     <ClInclude Include="Service.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SocketHelper.h" />
+    <ClInclude Include="Task.h" />
+    <ClInclude Include="TaskQueue.h" />
+    <ClInclude Include="TaskQueueManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClientService.cpp" />
@@ -192,6 +195,9 @@
     <ClCompile Include="Service.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="SocketHelper.cpp" />
+    <ClCompile Include="Task.cpp" />
+    <ClCompile Include="TaskQueue.cpp" />
+    <ClCompile Include="TaskQueueManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

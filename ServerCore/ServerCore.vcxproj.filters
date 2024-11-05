@@ -22,6 +22,12 @@
     <Filter Include="Network\IocpObj\Listener">
       <UniqueIdentifier>{2edbf35a-4219-46c0-babb-19c6db51a6a4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network\IOCP">
+      <UniqueIdentifier>{d7003f69-d1c1-454b-895c-3d4415006a9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Network\Task">
+      <UniqueIdentifier>{588313c0-f3ad-492f-9150-1b083006865a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -31,12 +37,6 @@
       <Filter>PCH</Filter>
     </ClCompile>
     <ClCompile Include="SocketHelper.cpp">
-      <Filter>Network</Filter>
-    </ClCompile>
-    <ClCompile Include="IocpCore.cpp">
-      <Filter>Network</Filter>
-    </ClCompile>
-    <ClCompile Include="IocpEvent.cpp">
       <Filter>Network</Filter>
     </ClCompile>
     <ClCompile Include="Service.cpp">
@@ -75,6 +75,21 @@
     <ClCompile Include="PacketHandler.cpp">
       <Filter>Network</Filter>
     </ClCompile>
+    <ClCompile Include="IocpCore.cpp">
+      <Filter>Network\IOCP</Filter>
+    </ClCompile>
+    <ClCompile Include="IocpEvent.cpp">
+      <Filter>Network\IOCP</Filter>
+    </ClCompile>
+    <ClCompile Include="Task.cpp">
+      <Filter>Network\Task</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskQueue.cpp">
+      <Filter>Network\Task</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskQueueManager.cpp">
+      <Filter>Network\Task</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -84,12 +99,6 @@
       <Filter>PCH</Filter>
     </ClInclude>
     <ClInclude Include="SocketHelper.h">
-      <Filter>Network</Filter>
-    </ClInclude>
-    <ClInclude Include="IocpCore.h">
-      <Filter>Network</Filter>
-    </ClInclude>
-    <ClInclude Include="IocpEvent.h">
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="Service.h">
@@ -127,6 +136,21 @@
     </ClInclude>
     <ClInclude Include="PacketHandler.h">
       <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="IocpCore.h">
+      <Filter>Network\IOCP</Filter>
+    </ClInclude>
+    <ClInclude Include="IocpEvent.h">
+      <Filter>Network\IOCP</Filter>
+    </ClInclude>
+    <ClInclude Include="Task.h">
+      <Filter>Network\Task</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskQueue.h">
+      <Filter>Network\Task</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskQueueManager.h">
+      <Filter>Network\Task</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
