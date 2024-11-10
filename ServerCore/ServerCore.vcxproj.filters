@@ -90,6 +90,9 @@
     <ClCompile Include="TaskQueueManager.cpp">
       <Filter>Network\Task</Filter>
     </ClCompile>
+    <ClCompile Include="TaskTimer.cpp">
+      <Filter>Network\Task</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -150,6 +153,9 @@
       <Filter>Network\Task</Filter>
     </ClInclude>
     <ClInclude Include="TaskQueueManager.h">
+      <Filter>Network\Task</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskTimer.h">
       <Filter>Network\Task</Filter>
     </ClInclude>
   </ItemGroup>

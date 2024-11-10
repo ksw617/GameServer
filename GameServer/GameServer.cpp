@@ -2,9 +2,11 @@
 #include "pch.h"
 #include <ServerService.h>
 #include <TaskQueueManager.h>
+#include <IocpCore.h>
+
 #include "ClientSession.h"
 #include "ClientPacketHandler.h"
-#include <IocpCore.h>
+
 
 
 #define THREAD_COUNT 5
@@ -22,7 +24,10 @@ static void DoWorkTask(shared_ptr<ServerService>& service)
 
 		service->GetIocpCore()->ObserveIO(10);
 
-		TaskQueueManager::Get().ProcessRemainingTasks();
+		//抗距等 老皑 贸府
+		TaskQueueManager::Get().DistributeReservedTasks();
+
+		TaskQueueManager::Get().ProcessRemainedTasks();
 	}
 }
 

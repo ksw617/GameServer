@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "TaskQueue.h"
+#include "TaskQueue.h"	
 #include "TaskQueueManager.h"
 
-void TaskQueue::Push(shared_ptr<Task>&& task)
+void TaskQueue::Push(shared_ptr<Task> task, bool  pushOnly)
 {
 	const int prevCount = taskCount.fetch_add(1);
 
@@ -13,7 +13,7 @@ void TaskQueue::Push(shared_ptr<Task>&& task)
 
 	if (prevCount == 0)
 	{
-		if (TaskQueueManager::Get().localTaskQueue == nullptr)
+		if (TaskQueueManager::Get().localTaskQueue == nullptr && pushOnly == false)
 		{
 			Execute();
 		}
@@ -21,6 +21,7 @@ void TaskQueue::Push(shared_ptr<Task>&& task)
 		{
 			TaskQueueManager::Get().Push(shared_from_this());
 		}
+
 	}
 }
 
@@ -60,7 +61,6 @@ void TaskQueue::Execute()
 			TaskQueueManager::Get().Push(shared_from_this());
 			return;
 		}
-
 	}
 }
 

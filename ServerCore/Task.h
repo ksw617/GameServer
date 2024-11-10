@@ -8,7 +8,7 @@ class Task
 private:
 	Callback callback;
 public:
-	Task(Callback&& func) : callback(func) {}
+	Task(Callback&& func) : callback(std::move(func)) {}
 
 	template<typename ReturnType, typename ClassType, typename... Args>
 	Task(shared_ptr<ClassType> pointer, ReturnType(ClassType::* memFunc)(Args...), Args&&... args)
