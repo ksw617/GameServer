@@ -34,14 +34,6 @@ int PacketSession::OnRecv(BYTE* buffer, int len)
 		//큰데이터를 쪼개서 넘김
 		//50byte 받았다면
 		//header : 21 + 4
-		
-		char a = buffer[4];
-		char b = buffer[5];
-		char c = buffer[6];
-		char d = buffer[7];
-		char e = buffer[8];
-		char f = buffer[9];
-
 		OnRecvPacket(&buffer[processLen], header.size);
 		
 		//[패킷 1번만 우선 처리]

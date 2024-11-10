@@ -125,8 +125,6 @@ void Session::ProcessConnect()
 }											
 
 
-
-
 //¼öÁ¤
 void Session::Send(shared_ptr<SendBuffer> sendBuffer)
 {
