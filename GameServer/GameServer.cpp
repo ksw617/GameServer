@@ -16,7 +16,7 @@ enum
 	WORKER_TICK = 64
 };
 
-static void DoWorkTask(shared_ptr<ServerService>& service)
+static void ExecuteTask(shared_ptr<ServerService>& service)
 {
 	while (true)
 	{
@@ -52,12 +52,12 @@ int main()
 		threads.push_back(thread
 		([&service]()
 			{
-				DoWorkTask(service);
+				ExecuteTask(service);
 			}
 		));
 	}
 
-	DoWorkTask(service);
+	ExecuteTask(service);
 
 
 	for (int i = 0; i < THREAD_COUNT; i++)
