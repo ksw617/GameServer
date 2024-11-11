@@ -115,7 +115,7 @@ struct S_CHATDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 S_CHATDefaultTypeInternal _S_CHAT_default_instance_;
 }  // namespace Protocol
 static ::_pb::Metadata file_level_metadata_Protocol_2eproto[7];
-static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_Protocol_2eproto = nullptr;
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_Protocol_2eproto[1];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_Protocol_2eproto = nullptr;
 
 const uint32_t TableStruct_Protocol_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
@@ -200,14 +200,19 @@ const char descriptor_table_protodef_Protocol_2eproto[] PROTOBUF_SECTION_VARIABL
   "Protocol.Player\"/\n\013S_JOIN_GAME\022 \n\006player"
   "\030\001 \001(\0132\020.Protocol.Player\"\025\n\006C_CHAT\022\013\n\003ms"
   "g\030\001 \001(\t\"\'\n\006S_CHAT\022\020\n\010playerID\030\001 \001(\004\022\013\n\003m"
-  "sg\030\002 \001(\tb\006proto3"
+  "sg\030\002 \001(\t*\242\001\n\010PacketID\022\022\n\016PACKET_C_LOGIN\020"
+  "\000\022\022\n\016PACKET_S_LOGIN\020\001\022\027\n\023PACKET_C_ENTER_"
+  "GAME\020\002\022\027\n\023PACKET_S_ENTER_GAME\020\003\022\026\n\022PACKE"
+  "T_S_JOIN_GAME\020\004\022\021\n\rPACKET_C_CHAT\020\005\022\021\n\rPA"
+  "CKET_S_CHAT\020\006B\033\252\002\030Google.Protobuf.Protoc"
+  "olb\006proto3"
   ;
 static const ::_pbi::DescriptorTable* const descriptor_table_Protocol_2eproto_deps[1] = {
   &::descriptor_table_Struct_2eproto,
 };
 static ::_pbi::once_flag descriptor_table_Protocol_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_Protocol_2eproto = {
-    false, false, 336, descriptor_table_protodef_Protocol_2eproto,
+    false, false, 530, descriptor_table_protodef_Protocol_2eproto,
     "Protocol.proto",
     &descriptor_table_Protocol_2eproto_once, descriptor_table_Protocol_2eproto_deps, 1, 7,
     schemas, file_default_instances, TableStruct_Protocol_2eproto::offsets,
@@ -221,6 +226,25 @@ PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_Protocol
 // Force running AddDescriptors() at dynamic initialization time.
 PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_Protocol_2eproto(&descriptor_table_Protocol_2eproto);
 namespace Protocol {
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* PacketID_descriptor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_Protocol_2eproto);
+  return file_level_enum_descriptors_Protocol_2eproto[0];
+}
+bool PacketID_IsValid(int value) {
+  switch (value) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+      return true;
+    default:
+      return false;
+  }
+}
+
 
 // ===================================================================
 

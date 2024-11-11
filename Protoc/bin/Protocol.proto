@@ -3,6 +3,19 @@ package Protocol;
 
 import "Struct.proto";
 
+option csharp_namespace = "Google.Protobuf.Protocol";
+
+enum PacketID {
+  PACKET_C_LOGIN = 0;
+  PACKET_S_LOGIN = 1;
+  PACKET_C_ENTER_GAME = 2;
+  PACKET_S_ENTER_GAME = 3;
+  PACKET_S_JOIN_GAME = 4;
+  PACKET_C_CHAT = 5;
+  PACKET_S_CHAT = 6;
+}
+
+
 message C_LOGIN
 {
 

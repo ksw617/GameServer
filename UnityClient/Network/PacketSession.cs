@@ -10,7 +10,6 @@
         public sealed override int OnRecv(ArraySegment<byte> buffer)
         {
             int processLen = 0; // 현재까지 처리한 바이트 수
-            int packetCount = 0; // 처리한 패킷 수
 
             while (buffer.Array != null)
             {
@@ -25,7 +24,6 @@
 
                 // 패킷 전체가 도착한 경우 패킷 데이터를 전달
                 OnRecvPacket(new ArraySegment<byte>(buffer.Array, buffer.Offset, dataSize));
-                packetCount++;
 
                 // 처리한 패킷의 길이만큼 이동
                 processLen += dataSize;
