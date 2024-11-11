@@ -8,11 +8,11 @@ void ClientPacketHandler::Init()
 	PacketHandler::Init();
 
 	packetHandlers[C_LOGIN] = [](shared_ptr<PacketSession>& session, BYTE* buffer, int len)
-		{ return HandlePacket<Protocol::C_LOGIN>(Handle_C_LOGIN, session, buffer, len);	};
+		{ return HandlePacket<Protocol::C_Login>(Handle_C_LOGIN, session, buffer, len);	};
 	packetHandlers[C_ENTER_GAME] = [](shared_ptr<PacketSession>& session, BYTE* buffer, int len)
-		{ return HandlePacket<Protocol::C_ENTER_GAME>(Handle_C_ENTER_GAME, session, buffer, len); };
+		{ return HandlePacket<Protocol::C_EnterGame>(Handle_C_ENTER_GAME, session, buffer, len); };
 	packetHandlers[C_CHAT] = [](shared_ptr<PacketSession>& session, BYTE* buffer, int len)
-		{ return HandlePacket<Protocol::C_CHAT>(Handle_C_CHAT, session, buffer, len);	};
+		{ return HandlePacket<Protocol::C_Chat>(Handle_C_CHAT, session, buffer, len);	};
 
 }
 
@@ -22,11 +22,11 @@ bool Handle_INVALID(shared_ptr<PacketSession>& session, BYTE* buffer, int len)
 	return false;
 }
 
-bool Handle_C_LOGIN(shared_ptr<PacketSession>& session, Protocol::C_LOGIN& packet)
+bool Handle_C_LOGIN(shared_ptr<PacketSession>& session, Protocol::C_Login& packet)
 {
 	printf("Client Login\n");
 
-	Protocol::S_LOGIN sendPacket;
+	Protocol::S_Login sendPacket;
 	//Todo
 	sendPacket.set_success(true);
 	int id = GameRoom::Get().GetID();
@@ -38,7 +38,7 @@ bool Handle_C_LOGIN(shared_ptr<PacketSession>& session, Protocol::C_LOGIN& packe
 	return true;
 }
 
-bool Handle_C_ENTER_GAME(shared_ptr<PacketSession>& session, Protocol::C_ENTER_GAME& packet)
+bool Handle_C_ENTER_GAME(shared_ptr<PacketSession>& session, Protocol::C_EnterGame& packet)
 {
 	printf("Client Enter Game\n");
 
@@ -49,7 +49,7 @@ bool Handle_C_ENTER_GAME(shared_ptr<PacketSession>& session, Protocol::C_ENTER_G
 	player->session = static_pointer_cast<ClientSession>(session);
 
 	{
-		Protocol::S_JOIN_GAME sendPacket;
+		Protocol::S_JoinGame sendPacket;
 
 		Protocol::Player* joinPlayer = new Protocol::Player;
 		joinPlayer->set_id(p.id());
@@ -66,7 +66,7 @@ bool Handle_C_ENTER_GAME(shared_ptr<PacketSession>& session, Protocol::C_ENTER_G
 	return true;
 }
 
-bool Handle_C_CHAT(shared_ptr<PacketSession>& session, Protocol::C_CHAT& packet)
+bool Handle_C_CHAT(shared_ptr<PacketSession>& session, Protocol::C_Chat& packet)
 {
 	
 	printf("C_CHAT : ");

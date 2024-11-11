@@ -25,8 +25,8 @@ namespace UnityClient.Network
         public override void OnConnected(EndPoint endPoint)
         {
             Console.WriteLine("OnConnected");
-            //C_LOGIN packet = new C_LOGIN();
-            //Send(packet);
+            C_Login packet = new C_Login();
+            Send(packet);
         }
 
         public override void OnDisconnected(EndPoint endPoint)

@@ -15,7 +15,7 @@ void GameRoom::Enter(shared_ptr<Player> player)
 		printf("Player ID [%u] ÀÔÀå\n", player->id);
 
 
-		Protocol::S_ENTER_GAME sendPacket;
+		Protocol::S_EnterGame sendPacket;
 		for (const auto& p : players)
 		{
 			Protocol::Player* player = sendPacket.add_players();

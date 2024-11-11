@@ -1,6 +1,5 @@
 #pragma once
 #include "ClientSession.h"
-#include "Struct.pb.h"
 
 class Player : public enable_shared_from_this<Player>
 {
