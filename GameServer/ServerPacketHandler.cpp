@@ -12,11 +12,11 @@ bool Handle_INVALID(shared_ptr<PacketSession>& session, BYTE* buffer, int len)
 void ServerPacketHandler::Init()
 {
     // 요청 패킷에 대한 핸들러 등록
-    RegisterPacketHandler<Protocol::LoginRequest>(LOGIN_REQUEST, Handle_LoginRequest);
-    RegisterPacketHandler<Protocol::EnterGameRequest>(ENTER_GAME_REQUEST, Handle_EnterGameRequest);
-    RegisterPacketHandler<Protocol::PlayerMoveRequest>(PLAYER_MOVE_REQUEST, Handle_PlayerMoveRequest);
-    RegisterPacketHandler<Protocol::ChatRequest>(CHAT_REQUEST, Handle_ChatRequest);
-    RegisterPacketHandler<Protocol::ActionRequest>(ACTION_REQUEST, Handle_ActionRequest);
+    RegisterPacketHandler<Protocol::LoginRequest>(PacketID::LOGIN_REQUEST, Handle_LoginRequest);
+    RegisterPacketHandler<Protocol::EnterGameRequest>(PacketID::ENTER_GAME_REQUEST, Handle_EnterGameRequest);
+    RegisterPacketHandler<Protocol::PlayerMoveRequest>(PacketID::PLAYER_MOVE_REQUEST, Handle_PlayerMoveRequest);
+    RegisterPacketHandler<Protocol::ChatRequest>(PacketID::CHAT_REQUEST, Handle_ChatRequest);
+    RegisterPacketHandler<Protocol::ActionRequest>(PacketID::ACTION_REQUEST, Handle_ActionRequest);
 }
 
 bool ServerPacketHandler::Handle_LoginRequest(shared_ptr<PacketSession>& session, Protocol::LoginRequest& packet)

@@ -4,6 +4,10 @@ protoc.exe --proto_path=./ --cpp_out=./ ./Enum.proto
 protoc.exe --proto_path=./ --cpp_out=./ ./Struct.proto
 protoc.exe --proto_path=./ --cpp_out=./ ./Protocol.proto
 
+protoc.exe -I=./ --csharp_out=./ ./Enum.proto 
+protoc.exe -I=./ --csharp_out=./ ./Struct.proto 
+protoc.exe -I=./ --csharp_out=./ ./Protocol.proto 
+
 IF ERRORLEVEL 1 PAUSE
 
 XCOPY /Y Protocol.pb.h "../../GameClient"
@@ -19,3 +23,7 @@ XCOPY /Y Struct.pb.h "../../GameServer"
 XCOPY /Y Struct.pb.cc "../../GameServer"
 XCOPY /Y Enum.pb.h "../../GameServer"
 XCOPY /Y Enum.pb.cc "../../GameServer"
+
+XCOPY /Y Protocol.cs "../../ClientCSharp/Protobuf"
+XCOPY /Y Struct.cs "../../ClientCSharp/Protobuf"
+XCOPY /Y Enum.cs "../../ClientCSharp/Protobuf"
