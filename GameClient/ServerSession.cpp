@@ -2,11 +2,11 @@
 #include "ServerSession.h"
 
 #include "Protocol.pb.h"
-#include "ServerPacketHandler.h"
+#include "ClientPacketHandler.h"
 
 void ServerSession::OnConnected()
 {
-    Protocol::C_LOGIN packet;
+    Protocol::LoginRequest packet;
     auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
     Send(sendBuffer);
     

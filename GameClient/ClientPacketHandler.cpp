@@ -3,61 +3,54 @@
 
 void ClientPacketHandler::Init()
 {
-    PacketHandler::Init();
-
-    // 클라이언트 요청 패킷 핸들러 등록
-    packetHandlers[LOGIN_REQUEST] = [](shared_ptr<PacketSession>& session, BYTE* buffer, int len)
-        { return HandlePacket<Protocol::LoginRequest>(Handle_LoginRequest, session, buffer, len); };
-
-    packetHandlers[ENTER_GAME_REQUEST] = [](shared_ptr<PacketSession>& session, BYTE* buffer, int len) 
-        { return HandlePacket<Protocol::EnterGameRequest>(Handle_EnterGameRequest, session, buffer, len); };
-
-    packetHandlers[PLAYER_MOVE_REQUEST] = [](shared_ptr<PacketSession>& session, BYTE* buffer, int len) 
-        { return HandlePacket<Protocol::PlayerMoveRequest>(Handle_PlayerMoveRequest, session, buffer, len); };
-
-    packetHandlers[CHAT_REQUEST] = [](shared_ptr<PacketSession>& session, BYTE* buffer, int len) 
-        { return HandlePacket<Protocol::ChatRequest>(Handle_ChatRequest, session, buffer, len);  };
-
-    packetHandlers[ACTION_REQUEST] = [](shared_ptr<PacketSession>& session, BYTE* buffer, int len) 
-        {  return HandlePacket<Protocol::ActionRequest>(Handle_ActionRequest, session, buffer, len);  };
+    // 패킷 ID와 핸들러를 매핑 (서버 → 클라이언트 응답 패킷)
+    RegisterPacketHandler<Protocol::LoginResponse>(LOGIN_RESPONSE, Handle_LoginResponse);
+    RegisterPacketHandler<Protocol::EnterGameResponse>(ENTER_GAME_RESPONSE, Handle_EnterGameResponse);
+    RegisterPacketHandler<Protocol::PlayerMoveResponse>(PLAYER_MOVE_RESPONSE, Handle_PlayerMoveResponse);
+    RegisterPacketHandler<Protocol::ChatResponse>(CHAT_RESPONSE, Handle_ChatResponse);
+    RegisterPacketHandler<Protocol::ActionResponse>(ACTION_RESPONSE, Handle_ActionResponse);
+    RegisterPacketHandler<Protocol::ActionResponse>(WORLD_STATE_UPDATE, Handle_WorldStateUpdate);
 }
 
-bool Handle_INVALID(shared_ptr<PacketSession>& session, BYTE* buffer, int len)
+// 서버로부터 받은 응답 처리
+bool ClientPacketHandler::Handle_LoginResponse(shared_ptr<PacketSession>& session, Protocol::LoginResponse& packet)
 {
-    return false;
-}
-
-
-bool Handle_LoginRequest(shared_ptr<PacketSession>& session, Protocol::LoginRequest& packet)
-{
-    printf("LoginRequest received: username=%s\n", packet.username().c_str());
-
-
+    if (packet.success())
+    {
+        printf("Login successful! Session ID: %s\n", packet.session_id().c_str());
+    }
+    else
+    {
+        printf("Login failed: %s\n", packet.error_message().c_str());
+    }
     return true;
 }
 
-bool Handle_EnterGameRequest(shared_ptr<PacketSession>& session, Protocol::EnterGameRequest& packet)
+bool ClientPacketHandler::Handle_EnterGameResponse(shared_ptr<PacketSession>& session, Protocol::EnterGameResponse& packet)
 {
-
+    printf("Entered game world. Welcome!\n");
     return true;
 }
 
-bool Handle_PlayerMoveRequest(shared_ptr<PacketSession>& session, Protocol::PlayerMoveRequest& packet)
+bool ClientPacketHandler::Handle_PlayerMoveResponse(shared_ptr<PacketSession>& session, Protocol::PlayerMoveResponse& packet)
+{
+    printf("Player move acknowledged.\n");
+    return true;
+}
+
+bool ClientPacketHandler::Handle_ChatResponse(shared_ptr<PacketSession>& session, Protocol::ChatResponse& packet)
 {
     return true;
 }
 
-bool Handle_ChatRequest(shared_ptr<PacketSession>& session, Protocol::ChatRequest& packet)
+bool ClientPacketHandler::Handle_ActionResponse(shared_ptr<PacketSession>& session, Protocol::ActionResponse& packet)
 {
-    printf("ChatRequest received: message=%s\n", packet.message().c_str());
-
+    printf("Action response received.\n");
     return true;
 }
 
-bool Handle_ActionRequest(shared_ptr<PacketSession>& session, Protocol::ActionRequest& packet)
+bool ClientPacketHandler::Handle_WorldStateUpdate(shared_ptr<PacketSession>& session, Protocol::ActionResponse& packet)
 {
-    printf("ActionRequest received: action_id=%s\n", packet.action_id().c_str());
-
+    printf("World state updated.\n");
     return true;
 }
-
