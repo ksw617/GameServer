@@ -12,7 +12,7 @@
 
 int main()
 {
-    ServerPacketHandler::Init();
+    ClientPacketHandler::Init();
 
 
     this_thread::sleep_for(1s);
@@ -57,7 +57,7 @@ int main()
         // 패킷에 UTF-8 문자열 설정
         Protocol::C_CHAT chatPacket;
         chatPacket.set_msg(utf8Msg);  // UTF-8로 설정
-        auto sendBuffer = ServerPacketHandler::MakeSendBuffer(chatPacket);
+        auto sendBuffer = ClientPacketHandler::MakeSendBuffer(chatPacket);
 
         clientService->GetSession()->Send(sendBuffer);
     }

@@ -7,7 +7,7 @@
 void ServerSession::OnConnected()
 {
     Protocol::C_LOGIN packet;
-    auto sendBuffer = ServerPacketHandler::MakeSendBuffer(packet);
+    auto sendBuffer = ClientPacketHandler::MakeSendBuffer(packet);
     Send(sendBuffer);
     
 }
@@ -15,7 +15,7 @@ void ServerSession::OnConnected()
 int ServerSession::OnRecvPacket(BYTE* buffer, int len)
 {
     shared_ptr<PacketSession> session = GetPacketSession();
-    ServerPacketHandler::HandlePacket(session, buffer, len);
+    ClientPacketHandler::HandlePacket(session, buffer, len);
 
     return len;
 }
