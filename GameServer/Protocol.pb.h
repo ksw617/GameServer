@@ -218,35 +218,35 @@ class LoginRequest final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kUsernameFieldNumber = 1,
-    kPasswordFieldNumber = 2,
+    kUserIdFieldNumber = 1,
+    kTokenFieldNumber = 2,
   };
-  // string username = 1;
-  void clear_username();
-  const std::string& username() const;
+  // string user_id = 1;
+  void clear_user_id();
+  const std::string& user_id() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_username(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_username();
-  PROTOBUF_NODISCARD std::string* release_username();
-  void set_allocated_username(std::string* username);
+  void set_user_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_user_id();
+  PROTOBUF_NODISCARD std::string* release_user_id();
+  void set_allocated_user_id(std::string* user_id);
   private:
-  const std::string& _internal_username() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_username(const std::string& value);
-  std::string* _internal_mutable_username();
+  const std::string& _internal_user_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_user_id(const std::string& value);
+  std::string* _internal_mutable_user_id();
   public:
 
-  // string password = 2;
-  void clear_password();
-  const std::string& password() const;
+  // string token = 2;
+  void clear_token();
+  const std::string& token() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_password(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_password();
-  PROTOBUF_NODISCARD std::string* release_password();
-  void set_allocated_password(std::string* password);
+  void set_token(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_token();
+  PROTOBUF_NODISCARD std::string* release_token();
+  void set_allocated_token(std::string* token);
   private:
-  const std::string& _internal_password() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_password(const std::string& value);
-  std::string* _internal_mutable_password();
+  const std::string& _internal_token() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_token(const std::string& value);
+  std::string* _internal_mutable_token();
   public:
 
   // @@protoc_insertion_point(class_scope:Protocol.LoginRequest)
@@ -257,8 +257,8 @@ class LoginRequest final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr username_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr password_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr user_id_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr token_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -387,25 +387,10 @@ class LoginResponse final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kSessionIdFieldNumber = 2,
-    kErrorMessageFieldNumber = 3,
+    kErrorMessageFieldNumber = 2,
     kSuccessFieldNumber = 1,
   };
-  // string session_id = 2;
-  void clear_session_id();
-  const std::string& session_id() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_session_id(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_session_id();
-  PROTOBUF_NODISCARD std::string* release_session_id();
-  void set_allocated_session_id(std::string* session_id);
-  private:
-  const std::string& _internal_session_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_session_id(const std::string& value);
-  std::string* _internal_mutable_session_id();
-  public:
-
-  // string error_message = 3;
+  // string error_message = 2;
   void clear_error_message();
   const std::string& error_message() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -436,7 +421,6 @@ class LoginResponse final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr session_id_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr error_message_;
     bool success_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -2020,104 +2004,104 @@ class ActionResponse final :
 #endif  // __GNUC__
 // LoginRequest
 
-// string username = 1;
-inline void LoginRequest::clear_username() {
-  _impl_.username_.ClearToEmpty();
+// string user_id = 1;
+inline void LoginRequest::clear_user_id() {
+  _impl_.user_id_.ClearToEmpty();
 }
-inline const std::string& LoginRequest::username() const {
-  // @@protoc_insertion_point(field_get:Protocol.LoginRequest.username)
-  return _internal_username();
+inline const std::string& LoginRequest::user_id() const {
+  // @@protoc_insertion_point(field_get:Protocol.LoginRequest.user_id)
+  return _internal_user_id();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void LoginRequest::set_username(ArgT0&& arg0, ArgT... args) {
+void LoginRequest::set_user_id(ArgT0&& arg0, ArgT... args) {
  
- _impl_.username_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:Protocol.LoginRequest.username)
+ _impl_.user_id_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:Protocol.LoginRequest.user_id)
 }
-inline std::string* LoginRequest::mutable_username() {
-  std::string* _s = _internal_mutable_username();
-  // @@protoc_insertion_point(field_mutable:Protocol.LoginRequest.username)
+inline std::string* LoginRequest::mutable_user_id() {
+  std::string* _s = _internal_mutable_user_id();
+  // @@protoc_insertion_point(field_mutable:Protocol.LoginRequest.user_id)
   return _s;
 }
-inline const std::string& LoginRequest::_internal_username() const {
-  return _impl_.username_.Get();
+inline const std::string& LoginRequest::_internal_user_id() const {
+  return _impl_.user_id_.Get();
 }
-inline void LoginRequest::_internal_set_username(const std::string& value) {
+inline void LoginRequest::_internal_set_user_id(const std::string& value) {
   
-  _impl_.username_.Set(value, GetArenaForAllocation());
+  _impl_.user_id_.Set(value, GetArenaForAllocation());
 }
-inline std::string* LoginRequest::_internal_mutable_username() {
+inline std::string* LoginRequest::_internal_mutable_user_id() {
   
-  return _impl_.username_.Mutable(GetArenaForAllocation());
+  return _impl_.user_id_.Mutable(GetArenaForAllocation());
 }
-inline std::string* LoginRequest::release_username() {
-  // @@protoc_insertion_point(field_release:Protocol.LoginRequest.username)
-  return _impl_.username_.Release();
+inline std::string* LoginRequest::release_user_id() {
+  // @@protoc_insertion_point(field_release:Protocol.LoginRequest.user_id)
+  return _impl_.user_id_.Release();
 }
-inline void LoginRequest::set_allocated_username(std::string* username) {
-  if (username != nullptr) {
+inline void LoginRequest::set_allocated_user_id(std::string* user_id) {
+  if (user_id != nullptr) {
     
   } else {
     
   }
-  _impl_.username_.SetAllocated(username, GetArenaForAllocation());
+  _impl_.user_id_.SetAllocated(user_id, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.username_.IsDefault()) {
-    _impl_.username_.Set("", GetArenaForAllocation());
+  if (_impl_.user_id_.IsDefault()) {
+    _impl_.user_id_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:Protocol.LoginRequest.username)
+  // @@protoc_insertion_point(field_set_allocated:Protocol.LoginRequest.user_id)
 }
 
-// string password = 2;
-inline void LoginRequest::clear_password() {
-  _impl_.password_.ClearToEmpty();
+// string token = 2;
+inline void LoginRequest::clear_token() {
+  _impl_.token_.ClearToEmpty();
 }
-inline const std::string& LoginRequest::password() const {
-  // @@protoc_insertion_point(field_get:Protocol.LoginRequest.password)
-  return _internal_password();
+inline const std::string& LoginRequest::token() const {
+  // @@protoc_insertion_point(field_get:Protocol.LoginRequest.token)
+  return _internal_token();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void LoginRequest::set_password(ArgT0&& arg0, ArgT... args) {
+void LoginRequest::set_token(ArgT0&& arg0, ArgT... args) {
  
- _impl_.password_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:Protocol.LoginRequest.password)
+ _impl_.token_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:Protocol.LoginRequest.token)
 }
-inline std::string* LoginRequest::mutable_password() {
-  std::string* _s = _internal_mutable_password();
-  // @@protoc_insertion_point(field_mutable:Protocol.LoginRequest.password)
+inline std::string* LoginRequest::mutable_token() {
+  std::string* _s = _internal_mutable_token();
+  // @@protoc_insertion_point(field_mutable:Protocol.LoginRequest.token)
   return _s;
 }
-inline const std::string& LoginRequest::_internal_password() const {
-  return _impl_.password_.Get();
+inline const std::string& LoginRequest::_internal_token() const {
+  return _impl_.token_.Get();
 }
-inline void LoginRequest::_internal_set_password(const std::string& value) {
+inline void LoginRequest::_internal_set_token(const std::string& value) {
   
-  _impl_.password_.Set(value, GetArenaForAllocation());
+  _impl_.token_.Set(value, GetArenaForAllocation());
 }
-inline std::string* LoginRequest::_internal_mutable_password() {
+inline std::string* LoginRequest::_internal_mutable_token() {
   
-  return _impl_.password_.Mutable(GetArenaForAllocation());
+  return _impl_.token_.Mutable(GetArenaForAllocation());
 }
-inline std::string* LoginRequest::release_password() {
-  // @@protoc_insertion_point(field_release:Protocol.LoginRequest.password)
-  return _impl_.password_.Release();
+inline std::string* LoginRequest::release_token() {
+  // @@protoc_insertion_point(field_release:Protocol.LoginRequest.token)
+  return _impl_.token_.Release();
 }
-inline void LoginRequest::set_allocated_password(std::string* password) {
-  if (password != nullptr) {
+inline void LoginRequest::set_allocated_token(std::string* token) {
+  if (token != nullptr) {
     
   } else {
     
   }
-  _impl_.password_.SetAllocated(password, GetArenaForAllocation());
+  _impl_.token_.SetAllocated(token, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.password_.IsDefault()) {
-    _impl_.password_.Set("", GetArenaForAllocation());
+  if (_impl_.token_.IsDefault()) {
+    _impl_.token_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:Protocol.LoginRequest.password)
+  // @@protoc_insertion_point(field_set_allocated:Protocol.LoginRequest.token)
 }
 
 // -------------------------------------------------------------------
@@ -2144,57 +2128,7 @@ inline void LoginResponse::set_success(bool value) {
   // @@protoc_insertion_point(field_set:Protocol.LoginResponse.success)
 }
 
-// string session_id = 2;
-inline void LoginResponse::clear_session_id() {
-  _impl_.session_id_.ClearToEmpty();
-}
-inline const std::string& LoginResponse::session_id() const {
-  // @@protoc_insertion_point(field_get:Protocol.LoginResponse.session_id)
-  return _internal_session_id();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void LoginResponse::set_session_id(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.session_id_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:Protocol.LoginResponse.session_id)
-}
-inline std::string* LoginResponse::mutable_session_id() {
-  std::string* _s = _internal_mutable_session_id();
-  // @@protoc_insertion_point(field_mutable:Protocol.LoginResponse.session_id)
-  return _s;
-}
-inline const std::string& LoginResponse::_internal_session_id() const {
-  return _impl_.session_id_.Get();
-}
-inline void LoginResponse::_internal_set_session_id(const std::string& value) {
-  
-  _impl_.session_id_.Set(value, GetArenaForAllocation());
-}
-inline std::string* LoginResponse::_internal_mutable_session_id() {
-  
-  return _impl_.session_id_.Mutable(GetArenaForAllocation());
-}
-inline std::string* LoginResponse::release_session_id() {
-  // @@protoc_insertion_point(field_release:Protocol.LoginResponse.session_id)
-  return _impl_.session_id_.Release();
-}
-inline void LoginResponse::set_allocated_session_id(std::string* session_id) {
-  if (session_id != nullptr) {
-    
-  } else {
-    
-  }
-  _impl_.session_id_.SetAllocated(session_id, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.session_id_.IsDefault()) {
-    _impl_.session_id_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:Protocol.LoginResponse.session_id)
-}
-
-// string error_message = 3;
+// string error_message = 2;
 inline void LoginResponse::clear_error_message() {
   _impl_.error_message_.ClearToEmpty();
 }
